@@ -1,0 +1,27 @@
+resource "openstack_networking_port_v2" "k8s_{{ clustername }}_port_{{ octet }}" {
+  name               = "k8s_{{ clustername }}_port_{{ octet }}"
+  network_id         = "${openstack_networking_network_v2.network_{{ clustername }}.id}"
+  admin_state_up     = "true"
+  security_group_ids = ["${openstack_networking_secgroup_v2.secgroup_{{ clustername }}-1.id}"]
+
+  fixed_ip {
+    "subnet_id"  = "${openstack_networking_subnet_v2.subnet_{{ clustername }}.id}"
+    "ip_address" = "{{ ipaddress }}"
+  }
+}
+
+resource "openstack_compute_instance_v2" "k8s-{{ clustername }}-node{{ octet }}" {
+  name      = "k8s-{{ clustername }}-node{{ octet }}"
+  availability_zone = "AMS-EQ1"
+  image_name  = "Container Linux CoreOS (third-party)"
+  flavor_id = "{{ workerimageflavor }}"
+  key_pair  = "{{ keypair }}"
+  security_groups = ["${openstack_networking_secgroup_v2.secgroup_{{ clustername }}-1.name}"]
+  user_data = "${file("node_{{ subnetcidr.rsplit('.', 1)[0] }}.{{ octet }}.yaml")}"
+
+  network {
+    name = "${openstack_networking_network_v2.network_{{ clustername }}.name}"
+    port = "${openstack_networking_port_v2.k8s_{{ clustername }}_port_{{ octet }}.id}"
+  }
+}
+

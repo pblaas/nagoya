@@ -1,0 +1,33 @@
+etcd:
+  version:                     "{{ etcdver }}"
+  advertise-client-urls:       "https://{{ ipaddress }}:2379"
+  initial-advertise-peer-urls: "https://{{ ipaddress }}:2380"
+  listen-client-urls:          "http://127.0.0.1:2379,https://{{ ipaddress }}:2379"
+  listen-peer-urls:            "https://{{ ipaddress }}:2380"
+  discovery:                   "{{ discoveryid }}"
+  cert-file:                   "/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node.pem"
+  key-file:                    "/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node-key.pem"
+  trusted-ca-file:             "/etc/kubernetes/ssl/etcd-ca.pem" 
+  client-cert-auth:            "true"
+  peer-cert-file:              "/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node.pem"
+  peer-key-file:               "/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node-key.pem"
+  peer-trusted-ca-file:        "/etc/kubernetes/ssl/etcd-ca.pem"
+  peer-client-cert-auth:       "true"
+{% if isworker == 1 %}
+  proxy: on
+{% endif %}
+
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys: [
+        "ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQBiwg/NhHsLYvzgnu348INH6YnZAZlKkTuW3bjJjJoy9FSc8hxJzl4vqe2XAK/7EtVCV3YaCA31/pB6wzv3/GKztZqZlqqOFkXsJWeZSekhb4Co2KIZMbIjzWlT/rSpsy3r/wJMeZbsSWV0UaqdxvZHE8yG/NIwPFliSKz5NxBm0f1ONlJTZ79FOlbl//EAAuqcQijJ1VzfNHSmFll5nD2hOib2+WpZ7KbWKVZHcfXlqqmNu1qna1r6K9ZKZScZCJp4LspZ1nJantZ/osBz7YTxt7h/XGgO5PB/SlPH9H9xRh0NIQCQD5h8nDjxRvC6yUlL1pf/z28tppMHvVwFiVvn"
+      ] 
+
+storage:
+  files:
+    - filesystem: "root"
+      path: "/home/core/test"
+      contents: 
+        inline: ';base64,ZGl0IGlzIGVlbiB0ZXN0Cg=='
+
