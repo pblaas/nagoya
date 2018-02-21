@@ -53,7 +53,7 @@ parser.add_argument("--dnsserver", help="DNS server - (8.8.8.8)", default="8.8.8
 parser.add_argument("--cloudprovider", help="Cloud provider support - (openstack)", default="openstack")
 parser.add_argument("--k8sver", help="Hyperkube version - (v1.8.7_coreos.0)", default="v1.8.7_coreos.0")
 parser.add_argument("--etcdver", help="ETCD version - (3.2.9)", default="3.2.9")
-parser.add_argument("--flannelver", help="Flannel image version - (v0.8.0)", default="v0.8.0")
+parser.add_argument("--flannelver", help="Flannel image version - (0.9.0)", default="0.9.0")
 parser.add_argument("--netoverlay", help="Network overlay - (flannel)", default="flannel")
 parser.add_argument("--authmode", help="Authorization mode - (AlwaysAllow)", default="AlwaysAllow")
 parser.add_argument("--alphafeatures", help="enable alpha feature - (false)", default="false")
@@ -67,7 +67,6 @@ cloudconfig_template = TEMPLATE_ENVIRONMENT.get_template('cloud.conf.tmpl')
 clusterstatus_template = TEMPLATE_ENVIRONMENT.get_template('cluster.status.tmpl')
 opensslmanager_template = TEMPLATE_ENVIRONMENT.get_template('./tls/openssl.cnf.tmpl')
 opensslworker_template = TEMPLATE_ENVIRONMENT.get_template('./tls/openssl-worker.cnf.tmpl')
-
 
 try:
     #Create CA certificates
@@ -164,6 +163,11 @@ try:
         with open('calico.yaml', 'w') as calico:
             calico.write(calicoconfig_template)
 
+
+    def configTranspiler(nodeip):
+        """Create json file from yaml content."""
+        subprocess.call(["./ct", "-files-dir=tls", "-in-file", "node_"+nodeip+".yaml", "-out-file", "node_"+nodeip+".json", "-pretty"])
+
     def createClusterId():
         """Create and Retrieve ClusterID."""
         global etcdTokenId
@@ -179,13 +183,15 @@ try:
         print("-"*40+"\n\nCluster Info:")
         print("Etcd ID token:\t" + str(etcdTokenId.rsplit('/', 1)[1]))
         print("k8s version:\t" + str(args.k8sver))
+        print("ETCD vers:\t" + str(args.etcdver))
+        print("Flannel vers:\t" + str(args.flannelver))
         print("Clustername:\t" + str(args.clustername))
         print("Cluster cidr:\t" + str(args.subnetcidr))
         print("Managers:\t" + str(args.managers))
         print("Workers:\t" + str(args.workers))
         print("Manager flavor:\t" +str(args.managerimageflavor))
         print("Worker flavor:\t" +str(args.workerimageflavor))
-        print("Glance image name:\t" +str(args.glanceimagename))
+        print("Glance imgname:\t" +str(args.glanceimagename))
         print("VIP1:\t\t" + str(args.floatingip1))
         print("VIP2:\t\t" + str(args.floatingip2))
         print("Dnsserver:\t" +str(args.dnsserver))
@@ -274,7 +280,6 @@ try:
         ))
 
 
-
     for node in range(10, args.managers+10):
         lanip = str(args.subnetcidr.rsplit('.', 1)[0] + "." + str(node))
         nodeyaml = str("node_" + lanip.rstrip(' ') + ".yaml")
@@ -320,7 +325,13 @@ try:
             etcdnodekeybase64=etcdnodekeybase64,
             cloudconfbase64=cloudconfbase64,
             sak8sbase64=sak8sbase64,
-            sak8skeybase64=sak8skeybase64
+            sak8skeybase64=sak8skeybase64,
+            authurl=os.environ["OS_AUTH_URL"],
+            username=args.username,
+            password=os.environ["OS_PASSWORD"],
+            region=os.environ["OS_REGION_NAME"],
+            projectname=args.projectname,
+            tenantid=os.environ["OS_TENANT_ID"]
             ))
 
         with open(nodeyaml, 'w') as controller:
@@ -367,10 +378,20 @@ try:
             etcdnodebase64=etcdnodebase64,
             etcdnodekeybase64=etcdnodekeybase64,
             cloudconfbase64=cloudconfbase64,
+            authurl=os.environ["OS_AUTH_URL"],
+            username=args.username,
+            password=os.environ["OS_PASSWORD"],
+            region=os.environ["OS_REGION_NAME"],
+            projectname=args.projectname,
+            tenantid=os.environ["OS_TENANT_ID"]
             ))
 
         with open(nodeyaml, 'w') as worker:
             worker.write(worker_template)
+
+    for node in range(10, args.managers+args.workers+10):
+        lanip = str(args.subnetcidr.rsplit('.', 1)[0] + "." + str(node))
+        configTranspiler(lanip)
 
     createClientCert("admin")
     createCalicoObjects()

@@ -1,33 +1,356 @@
 etcd:
   version:                     "{{ etcdver }}"
-  advertise-client-urls:       "https://{{ ipaddress }}:2379"
-  initial-advertise-peer-urls: "https://{{ ipaddress }}:2380"
-  listen-client-urls:          "http://127.0.0.1:2379,https://{{ ipaddress }}:2379"
-  listen-peer-urls:            "https://{{ ipaddress }}:2380"
+  advertise_client_urls:       "https://{{ ipaddress }}:2379"
+  initial_advertise_peer_urls: "https://{{ ipaddress }}:2380"
+  listen_client_urls:          "http://127.0.0.1:2379,https://{{ ipaddress }}:2379"
+  listen_peer_urls:            "https://{{ ipaddress }}:2380"
   discovery:                   "{{ discoveryid }}"
-  cert-file:                   "/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node.pem"
-  key-file:                    "/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node-key.pem"
-  trusted-ca-file:             "/etc/kubernetes/ssl/etcd-ca.pem" 
-  client-cert-auth:            "true"
-  peer-cert-file:              "/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node.pem"
-  peer-key-file:               "/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node-key.pem"
-  peer-trusted-ca-file:        "/etc/kubernetes/ssl/etcd-ca.pem"
-  peer-client-cert-auth:       "true"
+  cert_file:                   "/etc/ssl/certs/{{ ipaddress }}-etcd-node.pem"
+  key_file:                    "/etc/ssl/certs/{{ ipaddress }}-etcd-node-key.pem"
+  trusted_ca_file:             "/etc/ssl/certs/etcd-ca.pem"
+  client_cert_auth:            true
+  peer_cert_file:              "/etc/ssl/certs/{{ ipaddress }}-etcd-node.pem"
+  peer_key_file:               "/etc/ssl/certs/{{ ipaddress }}-etcd-node-key.pem"
+  peer_trusted_ca_file:        "/etc/ssl/certs/etcd-ca.pem"
+  peer_client_cert_auth:       true
 {% if isworker == 1 %}
   proxy: on
 {% endif %}
 
+networkd:
+  units:
+    - name: "00-ens.network"
+      contents: |
+        [Match]
+        Name=ens32
+        [Network]
+        DNS={{ dnsserver }}
+        Address={{ ipaddress }}
+        Gateway={{ ipaddressgw }}
+
 passwd:
   users:
     - name: core
+      password_hash: $6$$znxK7x1M.AKnEG5eQHGOfJpM/2X6L0H/S0VZUaZBzskOa/6ApOP5O1bu/HfD1/5ri4eWLB.4MKa4FLWiT8q.V/
       ssh_authorized_keys: [
         "ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQBiwg/NhHsLYvzgnu348INH6YnZAZlKkTuW3bjJjJoy9FSc8hxJzl4vqe2XAK/7EtVCV3YaCA31/pB6wzv3/GKztZqZlqqOFkXsJWeZSekhb4Co2KIZMbIjzWlT/rSpsy3r/wJMeZbsSWV0UaqdxvZHE8yG/NIwPFliSKz5NxBm0f1ONlJTZ79FOlbl//EAAuqcQijJ1VzfNHSmFll5nD2hOib2+WpZ7KbWKVZHcfXlqqmNu1qna1r6K9ZKZScZCJp4LspZ1nJantZ/osBz7YTxt7h/XGgO5PB/SlPH9H9xRh0NIQCQD5h8nDjxRvC6yUlL1pf/z28tppMHvVwFiVvn"
-      ] 
+      ]
+
+flannel:
+  interface: {{ ipaddress }}
+  version: "{{ flannelver }}"
+  network_config: '{ "Network": "10.244.0.0/16", "Backend":{"Type":"vxlan"}}'
+  etcd_endpoints: {{ etcdendpointsurls }}
+  etcd_keyfile: /etc/ssl/certs/{{ ipaddress }}-etcd-node-key.pem
+  etcd_certfile: /etc/ssl/certs/{{ ipaddress }}-etcd-node.pem
+  etcd_cafile: /etc/ssl/certs/etcd-ca.pem
+
+systemd:
+  units:
+    - name: kubelet.service
+      enabled: true
+      contents: |
+        [Unit]
+        Requires=docker.service
+        After=docker.service
+        [Service]
+        Environment=KUBELET_IMAGE_TAG={{ k8sver }}
+        Environment="RKT_RUN_ARGS=--uuid-file-save=/var/run/kubelet-pod.uuid \
+        --volume var-log,kind=host,source=/var/log \
+        --mount volume=var-log,target=/var/log \
+        --volume dns,kind=host,source=/etc/resolv.conf \
+        --mount volume=dns,target=/etc/resolv.conf \
+{% if netoverlay == "calico" %}
+        --volume cni-net,kind=host,source=/etc/cni/net.d \
+        --mount volume=cni-net,target=/etc/cni/net.d \
+        --volume cni-bin,kind=host,source=/opt/cni/bin \
+        --mount volume=cni-bin,target=/opt/cni/bin \
+{% endif %}
+        --hosts-entry=host"
+        ExecStartPre=/usr/bin/mkdir -p /etc/kubernetes/manifests
+        ExecStartPre=/usr/bin/mkdir -p /var/log/containers
+        ExecStartPre=-/usr/bin/rkt rm --uuid-file=/var/run/kubelet-pod.uuid
+{% if netoverlay == "calico" %}
+        ExecStartPre=/usr/bin/mkdir -p /opt/cni/bin
+        ExecStartPre=/usr/bin/mkdir -p /etc/cni/net.d
+{% endif %}
+        ExecStart=/usr/lib/coreos/kubelet-wrapper \
+        --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml \
+        --require-kubeconfig \
+{% if isworker != 1 %}
+        --register-schedulable=false \
+{% else %}
+        --register-node=true \
+{% endif %}
+{% if netoverlay == "calico" %}
+        --cni-conf-dir=/etc/cni/net.d \
+        --cni-bin-dir=/opt/cni/bin \
+{% else %}
+        --cni-conf-dir=/etc/kubernetes/cni/net.d \
+{% endif %}
+        --network-plugin=cni \
+        --container-runtime=docker \
+        --allow-privileged=true \
+        --pod-manifest-path=/etc/kubernetes/manifests \
+        --hostname-override={{ ipaddress }} \
+        --cluster_dns=10.3.0.10 \
+        --cluster_domain=cluster.local \
+        --client-ca-file=/etc/kubernetes/ssl/ca.pem \
+        --anonymous-auth=false \
+        --cloud-provider={{ cloudprovider }} \
+        --cloud-config=/etc/kubernetes/cloud.conf
+        ExecStop=-/usr/bin/rkt stop --uuid-file=/var/run/kubelet-pod.uuid
+        Restart=always
+        RestartSec=10
+        [Install]
+        WantedBy=multi-user.target
+
+locksmith:
+  reboot_strategy: "etcd-lock"
+  etcd_endpoints:  {{ etcdendpointsurls }}
+  etcd_keyfile: /etc/ssl/certs/{{ ipaddress }}-etcd-node-key.pem
+  etcd_certfile: /etc/ssl/certs/{{ ipaddress }}-etcd-node.pem
+  etcd_cafile: /etc/ssl/certs/etcd-ca.pem
+  window_start: "Thu 04:00"
+  window_length: "1h"
 
 storage:
   files:
     - filesystem: "root"
-      path: "/home/core/test"
-      contents: 
-        inline: ';base64,ZGl0IGlzIGVlbiB0ZXN0Cg=='
-
+      path: "/etc/resolv.conf"
+      mode: 0644
+      contents:
+        inline: |
+          nameserver {{ dnsserver }}
+    - filesystem: "root"
+      path: "/home/core/.bashrc"
+      mode: 0644
+      contents:
+        inline: |
+          if [[ $- != *i* ]] ; then
+            return
+          fi
+          export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/opt/bin:$PWD
+    - filesystem: "root"
+      path: "/etc/kubernetes/cni/docker_opts_cni.env"
+      mode: 0664
+      contents:
+        inline: |
+          DOCKER_OPT_BIP=""
+          DOCKER_OPT_IPMASQ=""
+    - filesystem: "root"
+      path: "/etc/kubernetes/cni/net.d/10-flannel.conf"
+      mode: 0644
+      contents:
+        inline: |
+          {
+            "name": "podnet",
+            "type": "flannel",
+            "delegate": {
+              "isDefaultGateway": true
+            }
+          }
+    - filesystem: "root"
+      path: "/home/core/etcdinfo.sh"
+      mode: 0665
+      contents:
+        inline: |
+          /usr/bin/etcdctl --cert-file=/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node.pem --key-file=/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node-key.pem --ca-file=/etc/kubernetes/ssl/etcd-ca.pem  cluster-health
+    - filesystem: "root"
+      path: "/etc/kubernetes/ssl/sa-{{ clustername }}-k8s-key.pem"
+      mode: 0664
+      contents:
+        local: "sa-{{ clustername }}-k8s-key.pem"
+    - filesystem: "root"
+      path: "/etc/kubernetes/ssl/sa-{{ clustername }}-k8s.pem"
+      mode: 0664
+      contents:
+        local: "sa-{{ clustername }}-k8s.pem"
+    - filesystem: "root"
+      path: "/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node-key.pem"
+      mode: 0664
+      contents:
+        local: "{{ ipaddress }}-k8s-node-key.pem"
+    - filesystem: "root"
+      path: "/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node.pem"
+      mode: 0664
+      contents:
+        local: "{{ ipaddress }}-k8s-node.pem"
+    - filesystem: "root"
+      path: "/etc/kubernetes/ssl/ca.pem"
+      mode: 0664
+      contents:
+        local: "ca.pem"
+    - filesystem: "root"
+      path: "/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node-key.pem"
+      mode: 0664
+      contents:
+        local: "{{ ipaddress }}-etcd-node-key.pem"
+    - filesystem: "root"
+      path: "/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node.pem"
+      mode: 0664
+      contents:
+        local: "{{ ipaddress }}-etcd-node.pem"
+    - filesystem: "root"
+      path: "/etc/kubernetes/ssl/etcd-ca.pem"
+      mode: 0664
+      contents:
+        local: "etcd-ca.pem"
+    - filesystem: "root"
+      path: "/etc/ssl/certs/{{ ipaddress }}-etcd-node-key.pem"
+      mode: 0664
+      contents:
+        local: "{{ ipaddress }}-etcd-node-key.pem"
+    - filesystem: "root"
+      path: "/etc/ssl/certs/{{ ipaddress }}-etcd-node.pem"
+      mode: 0664
+      contents:
+        local: "{{ ipaddress }}-etcd-node.pem"
+    - filesystem: "root"
+      path: "/etc/ssl/certs/etcd-ca.pem"
+      mode: 0664
+      contents:
+        local: "etcd-ca.pem"
+    - filesystem: "root"
+      path: "/etc/kubernetes/cloud.conf"
+      mode: 0664
+      contents:
+        inline: |
+          [Global]
+          auth-url="{{ authurl }}"
+          username={{ username }}
+          password={{ password }}
+          region={{ region }}
+          tenant-name="{{ projectname }}"
+          tenant-id={{ tenantid }}
+          domain-name=Default
+    - filesystem: "root"
+      path: "/etc/kubernetes/ssl/cloud.conf"
+      mode: 0664
+      contents:
+        inline: |
+          [Global]
+          auth-url="{{ authurl }}"
+          username={{ username }}
+          password={{ password }}
+          region={{ region }}
+          tenant-name="{{ projectname }}"
+          tenant-id={{ tenantid }}
+          domain-name=Default
+    - filesystem: "root"
+      path: "/etc/kubernetes/master-kubeconfig.yaml"
+      mode: 0644
+      contents:
+        inline: |
+          apiVersion: v1
+          kind: Config
+          clusters:
+          - name: local
+            cluster:
+{% if isworker == 1 %}
+              server: https://{{ loadbalancer }}
+{% else %}
+              server: https://{{ ipaddress }}
+{% endif %}
+              certificate-authority: /etc/kubernetes/ssl/ca.pem
+          users:
+          - name: kubelet
+            user:
+              client-certificate: /etc/kubernetes/ssl/{{ ipaddress }}-k8s-node.pem
+              client-key: /etc/kubernetes/ssl/{{ ipaddress }}-k8s-node-key.pem
+          contexts:
+          - context:
+              cluster: local
+              user: kubelet
+            name: kubelet-context
+          current-context: kubelet-context
+    - filesystem: "root"
+      path: /etc/ntp.conf
+      mode: 0644
+      contents:
+        inline: |
+          server 0.europe.pool.ntp.org
+          server 1.europe.pool.ntp.org
+          server 2.europe.pool.ntp.org
+          # - Allow only time queries, at a limited rate.
+          # - Allow all local queries (IPv4, IPv6)
+          restrict default nomodify nopeer noquery limited kod
+          restrict 127.0.0.1
+          restrict [::1]
+{% if isworker != 1 %}
+    - filesystem: "root"
+      path: "/etc/kubernetes/manifests/kube-apiserver.yaml"
+      mode: 0644
+      contents:
+        inline: |
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: kube-apiserver
+            namespace: kube-system
+          spec:
+            hostNetwork: true
+            containers:
+            - name: kube-apiserver
+              image: quay.io/coreos/hyperkube:{{ k8sver }}
+              command:
+              - /hyperkube
+              - apiserver
+              - --bind-address=0.0.0.0
+              - --etcd-servers={{ etcdendpointsurls }}
+              - --etcd-cafile=/etc/kubernetes/ssl/etcd-ca.pem
+              - --etcd-certfile=/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node.pem
+              - --etcd-keyfile=/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node-key.pem
+              - --apiserver-count={{ managers }}
+              - --allow-privileged=true
+              - --storage-backend=etcd3
+              - --service-cluster-ip-range=10.3.0.0/24
+              - --secure-port=443
+              - --advertise-address={{ ipaddress }}
+{% if alphafeatures == "true" %}
+              - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota,NodeRestriction,Initializers
+              - --runtime-config=extensions/v1beta1/networkpolicies=true,admissionregistration.k8s.io/v1alpha1
+{% else %}
+              - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota,NodeRestriction
+              - --runtime-config=extensions/v1beta1/networkpolicies=true
+{% endif %}
+              - --tls-cert-file=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node.pem
+              - --tls-private-key-file=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node-key.pem
+              - --client-ca-file=/etc/kubernetes/ssl/ca.pem
+              - --service-account-key-file=/etc/kubernetes/ssl/sa-{{ clustername }}-k8s.pem
+              - --kubelet-client-certificate=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node.pem
+              - --kubelet-client-key=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node-key.pem
+              - --anonymous-auth=false
+              - --authorization-mode={{ authmode }}
+              - --v=1
+              - --cloud-provider={{ cloudprovider }}
+              - --cloud-config=/etc/kubernetes/ssl/cloud.conf
+              livenessProbe:
+                httpGet:
+                  host: 127.0.0.1
+                  port: 8080
+                  path: /healthz
+                initialDelaySeconds: 15
+                timeoutSeconds: 15
+              ports:
+              - containerPort: 443
+                hostPort: 443
+                name: https
+              - containerPort: 8080
+                hostPort: 8080
+                name: local
+              volumeMounts:
+              - mountPath: /etc/kubernetes/ssl
+                name: ssl-certs-kubernetes
+                readOnly: true
+              - mountPath: /etc/ssl/certs
+                name: ssl-certs-host
+                readOnly: true
+            volumes:
+            - hostPath:
+                path: /etc/kubernetes/ssl
+              name: ssl-certs-kubernetes
+            - hostPath:
+                path: /usr/share/ca-certificates
+              name: ssl-certs-host
+{% endif %}
