@@ -22,7 +22,7 @@ networkd:
     - name: "00-ens.network"
       contents: |
         [Match]
-        Name=ens32
+        Name=eth0
         [Network]
         DNS={{ dnsserver }}
         Address={{ ipaddress }}
@@ -30,11 +30,18 @@ networkd:
 
 passwd:
   users:
-    - name: core
-      password_hash: $6$$znxK7x1M.AKnEG5eQHGOfJpM/2X6L0H/S0VZUaZBzskOa/6ApOP5O1bu/HfD1/5ri4eWLB.4MKa4FLWiT8q.V/
+    - name: core2
+      password_hash: $6$dLYTqS9esA6A9D6v$CdgcEJHniZtl1a/PeIGG3MqbF9tA.Jqn31SWmnn7s8xZbmNhuTjBeJsJYvpnhZFnTCfWLbHY.JEdUYh3YYJ3B0
       ssh_authorized_keys: [
         "ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQBiwg/NhHsLYvzgnu348INH6YnZAZlKkTuW3bjJjJoy9FSc8hxJzl4vqe2XAK/7EtVCV3YaCA31/pB6wzv3/GKztZqZlqqOFkXsJWeZSekhb4Co2KIZMbIjzWlT/rSpsy3r/wJMeZbsSWV0UaqdxvZHE8yG/NIwPFliSKz5NxBm0f1ONlJTZ79FOlbl//EAAuqcQijJ1VzfNHSmFll5nD2hOib2+WpZ7KbWKVZHcfXlqqmNu1qna1r6K9ZKZScZCJp4LspZ1nJantZ/osBz7YTxt7h/XGgO5PB/SlPH9H9xRh0NIQCQD5h8nDjxRvC6yUlL1pf/z28tppMHvVwFiVvn"
       ]
+      groups:
+        - "sudo"
+        - "docker"
+
+docker:
+  flags:
+    - --debug
 
 flannel:
   interface: {{ ipaddress }}
@@ -45,8 +52,15 @@ flannel:
   etcd_certfile: /etc/ssl/certs/{{ ipaddress }}-etcd-node.pem
   etcd_cafile: /etc/ssl/certs/etcd-ca.pem
 
+
 systemd:
   units:
+    - name: "docker.service"
+      dropins:
+        - name: "01.override-environment.conf"
+          contents: |
+            [Service]
+            EnvironmentFile=-/etc/kubernetes/docker-environment.env
     - name: kubelet.service
       enabled: true
       contents: |
@@ -117,6 +131,11 @@ locksmith:
 storage:
   files:
     - filesystem: "root"
+      path:       "/etc/hostname"
+      mode:       0644
+      contents:
+        inline: {{ ipaddress }}
+    - filesystem: "root"
       path: "/etc/resolv.conf"
       mode: 0644
       contents:
@@ -131,6 +150,19 @@ storage:
             return
           fi
           export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/opt/bin:$PWD
+    - filesystem: "root"
+      path: "/etc/motd.d/k8s.conf"
+      mode: 0644
+      contents:
+        local: "../motd.conf"
+    - filesystem: "root"
+      path:       "/etc/kubernetes/docker-environment.env"
+      mode:       0644
+      contents:
+        inline: |
+          DOCKER_OPT_BIP="--bip=172.17.0.1/24"
+          DOCKER_OPT_IPMASQ="--ip-masq=false"
+          DOCKER_OPT_MTU="--mtu=1450"
     - filesystem: "root"
       path: "/etc/kubernetes/cni/docker_opts_cni.env"
       mode: 0664
@@ -156,16 +188,6 @@ storage:
       contents:
         inline: |
           /usr/bin/etcdctl --cert-file=/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node.pem --key-file=/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node-key.pem --ca-file=/etc/kubernetes/ssl/etcd-ca.pem  cluster-health
-    - filesystem: "root"
-      path: "/etc/kubernetes/ssl/sa-{{ clustername }}-k8s-key.pem"
-      mode: 0664
-      contents:
-        local: "sa-{{ clustername }}-k8s-key.pem"
-    - filesystem: "root"
-      path: "/etc/kubernetes/ssl/sa-{{ clustername }}-k8s.pem"
-      mode: 0664
-      contents:
-        local: "sa-{{ clustername }}-k8s.pem"
     - filesystem: "root"
       path: "/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node-key.pem"
       mode: 0664
@@ -215,28 +237,12 @@ storage:
       path: "/etc/kubernetes/cloud.conf"
       mode: 0664
       contents:
-        inline: |
-          [Global]
-          auth-url="{{ authurl }}"
-          username={{ username }}
-          password={{ password }}
-          region={{ region }}
-          tenant-name="{{ projectname }}"
-          tenant-id={{ tenantid }}
-          domain-name=Default
+        local: "../cloud.conf"
     - filesystem: "root"
       path: "/etc/kubernetes/ssl/cloud.conf"
       mode: 0664
       contents:
-        inline: |
-          [Global]
-          auth-url="{{ authurl }}"
-          username={{ username }}
-          password={{ password }}
-          region={{ region }}
-          tenant-name="{{ projectname }}"
-          tenant-id={{ tenantid }}
-          domain-name=Default
+        local: "../cloud.conf"
     - filesystem: "root"
       path: "/etc/kubernetes/master-kubeconfig.yaml"
       mode: 0644
@@ -353,4 +359,164 @@ storage:
             - hostPath:
                 path: /usr/share/ca-certificates
               name: ssl-certs-host
+{% endif %}
+    - filesystem: "root"
+      path: "/etc/kubernetes/manifests/kube-proxy.yaml"
+      mode: 0644
+      contents:
+        inline: |
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: kube-proxy
+            namespace: kube-system
+          spec:
+            hostNetwork: true
+            containers:
+            - name: kube-proxy
+              image: quay.io/coreos/hyperkube:{{ k8sver }}
+              command:
+              - /hyperkube
+              - proxy
+{% if isworker == 1 %}
+              - --master=https://{{ loadbalancer }}
+{% else %}
+              - --master=http://127.0.0.1:8080
+{% endif %}
+              - --cluster-cidr=10.244.0.0/16
+              - --conntrack-max-per-core=0
+              - --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml
+              securityContext:
+                privileged: true
+              volumeMounts:
+              - mountPath: /etc/ssl/certs
+                name: ssl-certs-host
+                readOnly: true
+              - mountPath: /etc/kubernetes/master-kubeconfig.yaml
+                name: "kubeconfig"
+                readOnly: true
+              - mountPath: /etc/kubernetes/ssl
+                name: "etc-kube-ssl"
+                readOnly: true
+            volumes:
+            - hostPath:
+                path: /usr/share/ca-certificates
+              name: ssl-certs-host
+            - name: "kubeconfig"
+              hostPath:
+                path: "/etc/kubernetes/master-kubeconfig.yaml"
+            - name: "etc-kube-ssl"
+              hostPath:
+                path: "/etc/kubernetes/ssl"
+{% if isworker != 1 %}
+    - filesystem: "root"
+      path: "/etc/kubernetes/manifests/kube-controller-manager.yaml"
+      mode: 0644
+      contents:
+        inline: |
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: kube-controller-manager
+            namespace: kube-system
+          spec:
+            hostNetwork: true
+            containers:
+            - name: kube-controller-manager
+              image: quay.io/coreos/hyperkube:{{ k8sver }}
+              command:
+              - /hyperkube
+              - controller-manager
+              - --master=http://127.0.0.1:8080
+              - --leader-elect=true
+              - --service-account-private-key-file=/etc/kubernetes/ssl/sa-{{ clustername }}-k8s-key.pem
+              - --root-ca-file=/etc/kubernetes/ssl/ca.pem
+              - --cloud-provider={{ cloudprovider }}
+              - --cloud-config=/etc/kubernetes/ssl/cloud.conf
+              - --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml
+              resources:
+                requests:
+                  cpu: 200m
+              livenessProbe:
+                httpGet:
+                  host: 127.0.0.1
+                  path: /healthz
+                  port: 10252
+                initialDelaySeconds: 15
+                timeoutSeconds: 15
+              volumeMounts:
+              - mountPath: /etc/kubernetes/master-kubeconfig.yaml
+                name: kubeconfig
+                readOnly: true
+              - mountPath: /etc/kubernetes/ssl
+                name: etc-kube-ssl
+                readOnly: true
+            volumes:
+            - name: kubeconfig
+              hostPath:
+                path: /etc/kubernetes/master-kubeconfig.yaml
+            - name: etc-kube-ssl
+              hostPath:
+                path: /etc/kubernetes/ssl
+    - filesystem: "root"
+      path: "/etc/kubernetes/manifests/kube-scheduler.yaml"
+      mode: 0644
+      contents:
+        inline: |
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: kube-scheduler
+            namespace: kube-system
+          spec:
+            hostNetwork: true
+            containers:
+            - name: kube-scheduler
+              image: quay.io/coreos/hyperkube:{{ k8sver }}
+              command:
+              - /hyperkube
+              - scheduler
+              - --master=http://127.0.0.1:8080
+              - --leader-elect=true
+              - --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml
+              resources:
+                requests:
+                  cpu: 100m
+              livenessProbe:
+                httpGet:
+                  host: 127.0.0.1
+                  path: /healthz
+                  port: 10251
+                initialDelaySeconds: 15
+                timeoutSeconds: 15
+              volumeMounts:
+              - mountPath: /etc/ssl/certs
+                name: ssl-certs-host
+                readOnly: true
+              - mountPath: /etc/kubernetes/master-kubeconfig.yaml
+                name: "kubeconfig"
+                readOnly: true
+              - mountPath: /etc/kubernetes/ssl
+                name: "etc-kube-ssl"
+                readOnly: true
+            volumes:
+            - hostPath:
+                path: /usr/share/ca-certificates
+              name: ssl-certs-host
+            - name: "kubeconfig"
+              hostPath:
+                path: "/etc/kubernetes/master-kubeconfig.yaml"
+            - name: "etc-kube-ssl"
+              hostPath:
+                path: "/etc/kubernetes/ssl"
+    - filesystem: "root"
+      path: "/etc/kubernetes/ssl/sa-{{ clustername }}-k8s-key.pem"
+      mode: 0664
+      contents:
+        local: "sa-{{ clustername }}-k8s-key.pem"
+    - filesystem: "root"
+      path: "/etc/kubernetes/ssl/sa-{{ clustername }}-k8s.pem"
+      mode: 0664
+      contents:
+        local: "sa-{{ clustername }}-k8s.pem"
 {% endif %}

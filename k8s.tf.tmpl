@@ -19,7 +19,7 @@ resource "openstack_networking_subnet_v2" "subnet_{{ clustername }}" {
 
 resource "openstack_networking_router_v2" "k8s_{{ clustername }}_router" {
   name             = "k8s_{{ clustername }}_router"
-  external_gateway = "f9c73cd5-9e7b-4bfd-89eb-c2f4f584c326"
+  external_network_id = "f9c73cd5-9e7b-4bfd-89eb-c2f4f584c326"
 }
 
 resource "openstack_networking_router_interface_v2" "k8s_{{ clustername }}_router_interface" {
@@ -141,7 +141,7 @@ resource "openstack_networking_secgroup_rule_v2" "secgroup_{{ clustername }}-4-1
   protocol          = "tcp"
   port_range_min    =  1
   port_range_max    =  65535
-  remote_ip_prefix  = "{{ calicocidr }}"
+  remote_ip_prefix  = "{{ podcidr }}"
   security_group_id = "${openstack_networking_secgroup_v2.secgroup_{{ clustername }}-1.id}"
   depends_on = [
        "openstack_networking_secgroup_rule_v2.secgroup_{{ clustername }}-3-3"
@@ -154,7 +154,7 @@ resource "openstack_networking_secgroup_rule_v2" "secgroup_{{ clustername }}-4-2
   protocol          = "udp"
   port_range_min    =  1
   port_range_max    =  65535
-  remote_ip_prefix  = "{{ calicocidr }}"
+  remote_ip_prefix  = "{{ podcidr }}"
   security_group_id = "${openstack_networking_secgroup_v2.secgroup_{{ clustername }}-1.id}"
   depends_on = [
        "openstack_networking_secgroup_rule_v2.secgroup_{{ clustername }}-4-1"
@@ -165,7 +165,7 @@ resource "openstack_networking_secgroup_rule_v2" "secgroup_{{ clustername }}-4-3
   direction         = "ingress"
   ethertype         = "IPv4"
   protocol          = "icmp"
-  remote_ip_prefix  = "{{ calicocidr }}"
+  remote_ip_prefix  = "{{ podcidr }}"
   security_group_id = "${openstack_networking_secgroup_v2.secgroup_{{ clustername }}-1.id}"
   depends_on = [
        "openstack_networking_secgroup_rule_v2.secgroup_{{ clustername }}-4-2"
@@ -191,7 +191,7 @@ resource "openstack_networking_port_v2" "k8s_{{ clustername }}_port_{{ counter +
 resource "openstack_compute_instance_v2" "k8s-{{ clustername }}-node{{ counter + loop.index -1 }}" {
   name      = "k8s-{{ clustername }}-node{{ counter + loop.index - 1 }}"
   availability_zone = "AMS-EQ1"
-  image_name  = "Container Linux CoreOS (third-party)"
+  image_name  = "Container-Linux_1632"
   flavor_id = "{{ managerimageflavor }}"
   key_pair  = "{{ keypair }}"
   security_groups = ["${openstack_networking_secgroup_v2.secgroup_{{ clustername }}-1.name}"]
@@ -225,7 +225,7 @@ resource "openstack_networking_port_v2" "k8s_{{ clustername }}_port_{{ counter +
 resource "openstack_compute_instance_v2" "k8s-{{ clustername }}-node{{ counter + loop.index -1 }}" {
   name      = "k8s-{{ clustername }}-node{{ counter + loop.index - 1 }}"
   availability_zone = "AMS-EQ1"
-  image_name  = "Container Linux CoreOS (third-party)"
+  image_name  = "Container-Linux_1632"
   flavor_id = "{{ workerimageflavor }}"
   key_pair  = "{{ keypair }}"
   security_groups = ["${openstack_networking_secgroup_v2.secgroup_{{ clustername }}-1.name}"]
@@ -277,7 +277,7 @@ resource "openstack_lb_listener_v2" "{{ clustername }}_listener_1" {
 }
 
 resource "openstack_lb_pool_v2" "{{ clustername }}_pool_1" {
-  name        = "pool_1"
+  name        = "{{ clustername }}_pool_1"
   protocol    = "TCP"
   lb_method   = "ROUND_ROBIN"
   listener_id = "${openstack_lb_listener_v2.{{ clustername }}_listener_1.id}"
@@ -337,14 +337,14 @@ resource "openstack_lb_listener_v2" "{{ clustername }}_listener_3" {
 }
 
 resource "openstack_lb_pool_v2" "{{ clustername }}_pool_2" {
-  name        = "pool_2"
+  name        = "{{ clustername }}_pool_2"
   protocol    = "TCP"
   lb_method   = "ROUND_ROBIN"
   listener_id = "${openstack_lb_listener_v2.{{ clustername }}_listener_2.id}"
 }
 
 resource "openstack_lb_pool_v2" "{{ clustername }}_pool_3" {
-  name        = "pool_3"
+  name        = "{{ clustername }}_pool_3"
   protocol    = "TCP"
   lb_method   = "ROUND_ROBIN"
   listener_id = "${openstack_lb_listener_v2.{{ clustername }}_listener_3.id}"

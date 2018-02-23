@@ -43,7 +43,7 @@ parser.add_argument("--username", help="Openstack username - (OS_USERNAME enviro
 parser.add_argument("--projectname", help="Openstack project Name - (OS_TENANT_NAME environment variable)", default=os.environ["OS_TENANT_NAME"])
 parser.add_argument("--clustername", help="Clustername - (k8scluster)", default="k8scluster")
 parser.add_argument("--subnetcidr", help="Private subnet CIDR - (192.168.3.0/24)", default="192.168.3.0/24")
-parser.add_argument("--calicocidr", help="Calico subnet CIDR - (10.244.0.0/16)", default="10.244.0.0/16")
+parser.add_argument("--podcidr", help="Pod subnet CIDR - (10.244.0.0/16)", default="10.244.0.0/16")
 parser.add_argument("--managers", help="Number of k8s managers - (3)", type=int, default=3)
 parser.add_argument("--workers", help="Number of k8s workers - (0)", type=int, default=0)
 parser.add_argument("--managerimageflavor", help="Manager image flavor ID - (2004)", type=int, default=2004)
@@ -51,9 +51,9 @@ parser.add_argument("--workerimageflavor", help="Worker image flavor ID - (2008)
 parser.add_argument("--glanceimagename", help="Glance image name ID - (Container Linux CoreOS (third-party))", default="Container Linux CoreOS (third-party)")
 parser.add_argument("--dnsserver", help="DNS server - (8.8.8.8)", default="8.8.8.8")
 parser.add_argument("--cloudprovider", help="Cloud provider support - (openstack)", default="openstack")
-parser.add_argument("--k8sver", help="Hyperkube version - (v1.8.7_coreos.0)", default="v1.8.7_coreos.0")
-parser.add_argument("--etcdver", help="ETCD version - (3.2.9)", default="3.2.9")
-parser.add_argument("--flannelver", help="Flannel image version - (0.9.0)", default="0.9.0")
+parser.add_argument("--k8sver", help="Hyperkube version - (v1.9.3_coreos.0)", default="v1.9.3_coreos.0")
+parser.add_argument("--etcdver", help="ETCD version - (3.3.1)", default="3.3.1")
+parser.add_argument("--flannelver", help="Flannel image version - (0.10.0)", default="0.10.0")
 parser.add_argument("--netoverlay", help="Network overlay - (flannel)", default="flannel")
 parser.add_argument("--authmode", help="Authorization mode - (AlwaysAllow)", default="AlwaysAllow")
 parser.add_argument("--alphafeatures", help="enable alpha feature - (false)", default="false")
@@ -187,6 +187,7 @@ try:
         print("Flannel vers:\t" + str(args.flannelver))
         print("Clustername:\t" + str(args.clustername))
         print("Cluster cidr:\t" + str(args.subnetcidr))
+        print("Pod Cidr:\t" + str(args.podcidr))
         print("Managers:\t" + str(args.managers))
         print("Workers:\t" + str(args.workers))
         print("Manager flavor:\t" +str(args.managerimageflavor))
@@ -219,7 +220,7 @@ try:
             netoverlay=args.netoverlay,
             authmode=args.authmode,
             cloudprovider=args.cloudprovider,
-            calicocidr=args.calicocidr,
+            podcidr=args.podcidr,
             flannelver=args.flannelver,
             etcdver=args.etcdver,
             keypair=args.keypair
@@ -270,7 +271,7 @@ try:
         managers=args.managers,
         workers=args.workers,
         subnetcidr=args.subnetcidr,
-        calicocidr=args.calicocidr,
+        podcidr=args.podcidr,
         keypair=args.keypair,
         workerimageflavor=args.workerimageflavor,
         managerimageflavor=args.managerimageflavor,
@@ -312,7 +313,7 @@ try:
             authmode=args.authmode,
             clustername=args.clustername,
             subnetcidr=args.subnetcidr,
-            calicocidr=args.calicocidr,
+            podcidr=args.podcidr,
             ipaddress=lanip,
             ipaddressgw=(args.subnetcidr).rsplit('.', 1)[0]+".1",
             discoveryid=discovery_id,
@@ -325,13 +326,7 @@ try:
             etcdnodekeybase64=etcdnodekeybase64,
             cloudconfbase64=cloudconfbase64,
             sak8sbase64=sak8sbase64,
-            sak8skeybase64=sak8skeybase64,
-            authurl=os.environ["OS_AUTH_URL"],
-            username=args.username,
-            password=os.environ["OS_PASSWORD"],
-            region=os.environ["OS_REGION_NAME"],
-            projectname=args.projectname,
-            tenantid=os.environ["OS_TENANT_ID"]
+            sak8skeybase64=sak8skeybase64
             ))
 
         with open(nodeyaml, 'w') as controller:
@@ -366,7 +361,7 @@ try:
             authmode=args.authmode,
             clustername=args.clustername,
             subnetcidr=args.subnetcidr,
-            calicocidr=args.calicocidr,
+            podcidr=args.podcidr,
             ipaddress=lanip,
             ipaddressgw=(args.subnetcidr).rsplit('.', 1)[0]+".1",
             loadbalancer=(args.subnetcidr).rsplit('.', 1)[0]+".3",
@@ -377,13 +372,7 @@ try:
             k8snodekeybase64=k8snodekeybase64,
             etcdnodebase64=etcdnodebase64,
             etcdnodekeybase64=etcdnodekeybase64,
-            cloudconfbase64=cloudconfbase64,
-            authurl=os.environ["OS_AUTH_URL"],
-            username=args.username,
-            password=os.environ["OS_PASSWORD"],
-            region=os.environ["OS_REGION_NAME"],
-            projectname=args.projectname,
-            tenantid=os.environ["OS_TENANT_ID"]
+            cloudconfbase64=cloudconfbase64
             ))
 
         with open(nodeyaml, 'w') as worker:
