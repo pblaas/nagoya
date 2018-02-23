@@ -31,9 +31,9 @@ networkd:
 passwd:
   users:
     - name: core2
-      password_hash: $6$dLYTqS9esA6A9D6v$CdgcEJHniZtl1a/PeIGG3MqbF9tA.Jqn31SWmnn7s8xZbmNhuTjBeJsJYvpnhZFnTCfWLbHY.JEdUYh3YYJ3B0
+      password_hash: {{ cryptedPass }}
       ssh_authorized_keys: [
-        "ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQBiwg/NhHsLYvzgnu348INH6YnZAZlKkTuW3bjJjJoy9FSc8hxJzl4vqe2XAK/7EtVCV3YaCA31/pB6wzv3/GKztZqZlqqOFkXsJWeZSekhb4Co2KIZMbIjzWlT/rSpsy3r/wJMeZbsSWV0UaqdxvZHE8yG/NIwPFliSKz5NxBm0f1ONlJTZ79FOlbl//EAAuqcQijJ1VzfNHSmFll5nD2hOib2+WpZ7KbWKVZHcfXlqqmNu1qna1r6K9ZKZScZCJp4LspZ1nJantZ/osBz7YTxt7h/XGgO5PB/SlPH9H9xRh0NIQCQD5h8nDjxRvC6yUlL1pf/z28tppMHvVwFiVvn"
+        "{{ sshkey }}"
       ]
       groups:
         - "sudo"

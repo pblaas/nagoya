@@ -11,6 +11,9 @@ import httplib
 import os
 import subprocess
 import base64
+import crypt
+import string
+import random
 from jinja2 import Environment, FileSystemLoader
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -51,7 +54,7 @@ parser.add_argument("--workerimageflavor", help="Worker image flavor ID - (2008)
 parser.add_argument("--glanceimagename", help="Glance image name ID - (Container Linux CoreOS (third-party))", default="Container Linux CoreOS (third-party)")
 parser.add_argument("--dnsserver", help="DNS server - (8.8.8.8)", default="8.8.8.8")
 parser.add_argument("--cloudprovider", help="Cloud provider support - (openstack)", default="openstack")
-parser.add_argument("--k8sver", help="Hyperkube version - (v1.9.3_coreos.0)", default="v1.9.3_coreos.0")
+parser.add_argument("--k8sver", help="Hyperkube version - (v1.8.7_coreos.0)", default="v1.8.7_coreos.0")
 parser.add_argument("--etcdver", help="ETCD version - (3.3.1)", default="3.3.1")
 parser.add_argument("--flannelver", help="Flannel image version - (0.10.0)", default="0.10.0")
 parser.add_argument("--netoverlay", help="Network overlay - (flannel)", default="flannel")
@@ -168,6 +171,19 @@ try:
         """Create json file from yaml content."""
         subprocess.call(["./ct", "-files-dir=tls", "-in-file", "node_"+nodeip+".yaml", "-out-file", "node_"+nodeip+".json", "-pretty"])
 
+    def generatePassword():
+        """Generate a random password."""
+        randomsalt = ""
+        global password
+        global cryptedPass
+        password = ""
+        choices = string.ascii_uppercase + string.digits + string.ascii_lowercase
+        for _ in range(0, 12):
+            password += random.choice(choices)
+        for _ in range(0, 8):
+            randomsalt += random.choice(choices)
+        cryptedPass = crypt.crypt(password, '$6$%s$' % randomsalt)
+
     def createClusterId():
         """Create and Retrieve ClusterID."""
         global etcdTokenId
@@ -178,9 +194,17 @@ try:
         etcdTokenId = discoverurl.getresponse().read()
         return etcdTokenId
 
+    def returnPublicKey():
+        """Retrieve rsa-ssh public key from OpenStack."""
+        global rsakey
+        rsakey = subprocess.check_output(["openstack", "keypair", "show", "--public-key", args.keypair]).strip()
+        return rsakey
+
     def printClusterInfo():
         """Print cluster info."""
         print("-"*40+"\n\nCluster Info:")
+        print("Core password:\t" + str(password))
+        print("Keypair:\t" + str(rsakey))
         print("Etcd ID token:\t" + str(etcdTokenId.rsplit('/', 1)[1]))
         print("k8s version:\t" + str(args.k8sver))
         print("ETCD vers:\t" + str(args.etcdver))
@@ -206,6 +230,7 @@ try:
         clusterstatusconfig_template = (clusterstatus_template.render(
             etcdendpointsurls=iplist.rstrip(','),
             etcdtoken=etcdTokenId,
+            password=password,
             k8sver=args.k8sver,
             clustername=args.clustername,
             subnetcidr=args.subnetcidr,
@@ -223,7 +248,8 @@ try:
             podcidr=args.podcidr,
             flannelver=args.flannelver,
             etcdver=args.etcdver,
-            keypair=args.keypair
+            keypair=args.keypair,
+            rsakey=rsakey
             ))
 
         with open('cluster.status', 'w') as k8sstat:
@@ -241,6 +267,9 @@ try:
     createCaCert()
     #create ServiceAccount certificate
     createSAcert()
+    #Create core user passowrd
+    generatePassword()
+    returnPublicKey()
 
     buffer = open('./tls/ca.pem', 'rU').read()
     CAPEM = base64.b64encode(buffer)
@@ -300,6 +329,8 @@ try:
 
 
         manager_template = (cloudconf_template.render(
+            cryptedPass=cryptedPass,
+            sshkey=rsakey,
             managers=args.managers,
             workers=args.workers,
             dnsserver=args.dnsserver,
@@ -350,6 +381,8 @@ try:
             isworker=1,
             managers=args.managers,
             workers=args.workers,
+            cryptedPass=cryptedPass,
+            sshkey=rsakey,
             dnsserver=args.dnsserver,
             etcdendpointsurls=iplist.rstrip(','),
             floatingip1=args.floatingip1,
