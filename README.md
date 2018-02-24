@@ -65,7 +65,7 @@ optional arguments:
 ```
 
 #### Features
-* HA master K8S setup.
+* HA manager K8S setup.
 * PKI on ETCD cluster.
 * PKI on K8S nodes.
 * RBAC authorization mode.
@@ -84,4 +84,4 @@ If you are using this script without my managment container (pblaas/openstack-cl
 * export OS_TENANT_ID=$OS_PROJECT_ID
 * export OS_TENANT_NAME=$OS_PROJECT_NAME
 
-
+Make sure you have current version of the openstack CLI tool which is used during the deployment by the Python script.
