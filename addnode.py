@@ -2,7 +2,7 @@
 """Kubernetes cluster generator - addnode."""
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 __status__ = "Active"
 
 
@@ -36,6 +36,7 @@ if not "OS_AUTH_URL" in os.environ:
 parser = argparse.ArgumentParser()
 parser.add_argument("ipaddress", help="node ip address")
 parser.add_argument("--workerimageflavor", help="Worker image flavor ID")
+parser.add_argument("--glanceimagename", help="Glance image name ID - (Container Linux CoreOS (third-party))", default="Container Linux CoreOS (third-party)")
 parser.add_argument("--username", help="Openstack username - (OS_USERNAME environment variable)", default=os.environ["OS_USERNAME"])
 parser.add_argument("--projectname", help="Openstack project Name - (OS_TENANT_NAME environment variable)", default=os.environ["OS_TENANT_NAME"])
 parser.add_argument("--k8sver", help="Hyperkube version")
@@ -170,6 +171,7 @@ try:
                 clustername=clustername,
                 ipaddress=lanip,
                 workerimageflavor=workerimageflavor,
+                glanceimagename=args.glanceimagename,
                 keypair=keypair,
                 subnetcidr=subnetcidr,
                 octet=lanip.rsplit('.', 1)[1]

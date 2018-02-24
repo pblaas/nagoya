@@ -13,7 +13,7 @@ resource "openstack_networking_port_v2" "k8s_{{ clustername }}_port_{{ octet }}"
 resource "openstack_compute_instance_v2" "k8s-{{ clustername }}-node{{ octet }}" {
   name      = "k8s-{{ clustername }}-node{{ octet }}"
   availability_zone = "AMS-EQ1"
-  image_name  = "Container Linux CoreOS (third-party)"
+  image_name  = "{{ glanceimagename }}"
   flavor_id = "{{ workerimageflavor }}"
   key_pair  = "{{ keypair }}"
   security_groups = ["${openstack_networking_secgroup_v2.secgroup_{{ clustername }}-1.name}"]

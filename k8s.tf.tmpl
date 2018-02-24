@@ -191,7 +191,7 @@ resource "openstack_networking_port_v2" "k8s_{{ clustername }}_port_{{ counter +
 resource "openstack_compute_instance_v2" "k8s-{{ clustername }}-node{{ counter + loop.index -1 }}" {
   name      = "k8s-{{ clustername }}-node{{ counter + loop.index - 1 }}"
   availability_zone = "AMS-EQ1"
-  image_name  = "Container-Linux_1632"
+  image_name  = "{{ glanceimagename }}"
   flavor_id = "{{ managerimageflavor }}"
   key_pair  = "{{ keypair }}"
   security_groups = ["${openstack_networking_secgroup_v2.secgroup_{{ clustername }}-1.name}"]
@@ -225,7 +225,7 @@ resource "openstack_networking_port_v2" "k8s_{{ clustername }}_port_{{ counter +
 resource "openstack_compute_instance_v2" "k8s-{{ clustername }}-node{{ counter + loop.index -1 }}" {
   name      = "k8s-{{ clustername }}-node{{ counter + loop.index - 1 }}"
   availability_zone = "AMS-EQ1"
-  image_name  = "Container-Linux_1632"
+  image_name  = "{{ glanceimagename }}"
   flavor_id = "{{ workerimageflavor }}"
   key_pair  = "{{ keypair }}"
   security_groups = ["${openstack_networking_secgroup_v2.secgroup_{{ clustername }}-1.name}"]
