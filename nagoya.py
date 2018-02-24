@@ -2,7 +2,7 @@
 """Kubernetes cluster generator."""
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 __status__ = "Active"
 
 
@@ -249,7 +249,8 @@ try:
             flannelver=args.flannelver,
             etcdver=args.etcdver,
             keypair=args.keypair,
-            rsakey=rsakey
+            rsakey=rsakey,
+            cryptedpass=cryptedPass
             ))
 
         with open('cluster.status', 'w') as k8sstat:

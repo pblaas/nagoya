@@ -55,6 +55,93 @@ flannel:
 
 systemd:
   units:
+    - name: vm.max_map_count.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Set vm.max_map_count
+        [Service]
+        ExecStart=/bin/sh -c "sysctl -w vm.max_map_count=384000"
+        RemainAfterExit=yes
+        Type=oneshot
+        [Install]
+        WantedBy=multi-user.target
+    - name: increase-nf_conntrack-connections.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Increase the number of connections in nf_conntrack.
+        [Service]
+        Type=oneshot
+        ExecStartPre=/usr/sbin/modprobe nf_conntrack
+        ExecStart=/bin/sh -c "sysctl -w net.netfilter.nf_conntrack_max=589824"
+        [Install]
+        WantedBy=multi-user.target
+    - name: increase-nf_conntrack-hashsize.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Increase the nf_conntrack hashsize.
+        [Service]
+        Type=oneshot
+        ExecStart=/bin/sh -c "echo 147456 > /sys/module/nf_conntrack/parameters/hashsize"
+        [Install]
+        WantedBy=multi-user.target
+    - name: increase-port_range.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Increase port_range.
+        [Service]
+        Type=oneshot
+        ExecStart=/bin/sh -c "echo 1024 65535 > /proc/sys/net/ipv4/ip_local_port_range"
+        [Install]
+        WantedBy=multi-user.target
+    - name: increase-net.core.somaxconn.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Increase net.core.somaxconn.
+        [Service]
+        Type=oneshot
+        ExecStart=/bin/sh -c "sysctl -w net.core.somaxconn=256"
+        [Install]
+        WantedBy=multi-user.target
+    - name: change-conntrack_timeout.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=change conntrack tcp timeout.
+        [Service]
+        Type=idle
+        ExecStart=/bin/sh -c "sysctl -w net.netfilter.nf_conntrack_tcp_timeout_time_wait=1"
+        [Install]
+        WantedBy=multi-user.target
+    - name: change-tcp_timeout_estab.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=change tcp timeout estab.
+        [Service]
+        Type=idle
+        ExecStart=/bin/sh -c "sysctl -w net.netfilter.nf_conntrack_tcp_timeout_established=600"
+        [Install]
+        WantedBy=multi-user.target
+    - name: settimezone.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Set the time zone
+        [Service]
+        ExecStart=/usr/bin/timedatectl set-timezone Europe/Amsterdam
+        RemainAfterExit=yes
+        Type=oneshot
+        [Install]
+        WantedBy=multi-user.target
+    - name: systemd-sysctl.service
+      enabled: true
+    - name: "ntpd.service"
+      enabled: true
     - name: "docker.service"
       dropins:
         - name: "01.override-environment.conf"
