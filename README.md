@@ -1,5 +1,5 @@
 # nagoya
-Next development iteration of my terraformed kubernetes deploy scripts to produce Cloud Linux config files for boostrapping Kubernetes.
+Next development iteration of my terraformed kubernetes deploy scripts to produce Cloud Linux config files for boostrapping Kubernetes on OpenStack.
 
 This project has a lot of similarities to project kioto but differs on the following:
 * nagoya is based on etcd3
@@ -81,7 +81,7 @@ optional arguments:
 #### Caveats
 If you are using this script without my managment container (pblaas/openstack-cli) make sure you set the following environment variables:
 
-export OS_TENANT_ID=$OS_PROJECT_ID
-export OS_TENANT_NAME=$OS_PROJECT_NAME
+* export OS_TENANT_ID=$OS_PROJECT_ID
+* export OS_TENANT_NAME=$OS_PROJECT_NAME
 
 
