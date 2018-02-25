@@ -19,7 +19,7 @@ etcd:
 
 networkd:
   units:
-    - name: "00-ens.network"
+    - name: "00-eth.network"
       contents: |
         [Match]
         Name=eth0
@@ -30,7 +30,7 @@ networkd:
 
 passwd:
   users:
-    - name: core2
+    - name: core
       password_hash: {{ cryptedPass }}
       ssh_authorized_keys: [
         "{{ sshkey }}"
