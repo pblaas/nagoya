@@ -111,7 +111,7 @@ systemd:
         [Install]
         WantedBy=multi-user.target
     - name: change-conntrack_timeout.service
-      enabled: true
+      enabled: false
       contents: |
         [Unit]
         Description=change conntrack tcp timeout.
@@ -121,7 +121,7 @@ systemd:
         [Install]
         WantedBy=multi-user.target
     - name: change-tcp_timeout_estab.service
-      enabled: true
+      enabled: false
       contents: |
         [Unit]
         Description=change tcp timeout estab.
