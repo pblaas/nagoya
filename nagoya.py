@@ -2,7 +2,7 @@
 """Kubernetes cluster generator."""
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.3"
+__version__ = "0.3.4"
 __status__ = "Active"
 
 
@@ -343,6 +343,7 @@ try:
             workers=args.workers,
             dnsserver=args.dnsserver,
             etcdendpointsurls=iplist.rstrip(','),
+            etcdid=(node-10),
             initialclusterlist=initialclusterlist.rstrip(','),
             floatingip1=args.floatingip1,
             k8sver=args.k8sver,
@@ -394,6 +395,7 @@ try:
             sshkey=rsakey,
             dnsserver=args.dnsserver,
             etcdendpointsurls=iplist.rstrip(','),
+            etcdid=(node-10),
             initialclusterlist=initialclusterlist.rstrip(','),
             floatingip1=args.floatingip1,
             k8sver=args.k8sver,
