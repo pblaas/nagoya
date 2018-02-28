@@ -75,9 +75,10 @@ systemd:
         [Unit]
         Description=Increase the number of connections in nf_conntrack.
         [Service]
-        Type=oneshot
+        Type=idle
         ExecStartPre=/usr/sbin/modprobe nf_conntrack
         ExecStart=/bin/sh -c "sysctl -w net.netfilter.nf_conntrack_max=589824"
+        Restart=on-failure
         [Install]
         WantedBy=multi-user.target
     - name: increase-nf_conntrack-hashsize.service
@@ -86,8 +87,9 @@ systemd:
         [Unit]
         Description=Increase the nf_conntrack hashsize.
         [Service]
-        Type=oneshot
+        Type=idle
         ExecStart=/bin/sh -c "echo 147456 > /sys/module/nf_conntrack/parameters/hashsize"
+        Restart=on-failure
         [Install]
         WantedBy=multi-user.target
     - name: increase-port_range.service
@@ -111,23 +113,25 @@ systemd:
         [Install]
         WantedBy=multi-user.target
     - name: change-conntrack_timeout.service
-      enabled: false
+      enabled: true
       contents: |
         [Unit]
         Description=change conntrack tcp timeout.
         [Service]
         Type=idle
         ExecStart=/bin/sh -c "sysctl -w net.netfilter.nf_conntrack_tcp_timeout_time_wait=1"
+        Restart=on-failure
         [Install]
         WantedBy=multi-user.target
     - name: change-tcp_timeout_estab.service
-      enabled: false
+      enabled: true
       contents: |
         [Unit]
         Description=change tcp timeout estab.
         [Service]
         Type=idle
         ExecStart=/bin/sh -c "sysctl -w net.netfilter.nf_conntrack_tcp_timeout_established=600"
+        Restart=on-failure
         [Install]
         WantedBy=multi-user.target
     - name: settimezone.service
