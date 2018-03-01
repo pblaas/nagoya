@@ -2,7 +2,7 @@
 """Kubernetes cluster generator."""
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.5"
+__version__ = "0.3.6"
 __status__ = "Active"
 
 import argparse
@@ -12,6 +12,7 @@ import base64
 import crypt
 import string
 import random
+imprt test
 from jinja2 import Environment, FileSystemLoader
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -74,17 +75,17 @@ try:
 
     def createCaCert():
         """Create CA certificates."""
-        print "CA"
+        print("CA")
         subprocess.call(["openssl", "genrsa", "-out", "ca-key.pem", "2048"], cwd='./tls')
         subprocess.call(["openssl", "req", "-x509", "-new", "-nodes", "-key", "ca-key.pem", "-days", "10000", "-out", "ca.pem", "-subj", "/CN=k8s-ca"], cwd='./tls')
 
-        print "etcd CA"
+        print("etcd CA")
         subprocess.call(["openssl", "genrsa", "-out", "etcd-ca-key.pem", "2048"], cwd='./tls')
         subprocess.call(["openssl", "req", "-x509", "-new", "-nodes", "-key", "etcd-ca-key.pem", "-days", "10000", "-out", "etcd-ca.pem", "-subj", "/CN=etcd-k8s-ca"], cwd='./tls')
 
     def createSAcert():
         """Create Service Account certificates."""
-        print "ServiceAcccount cert"
+        print("ServiceAcccount cert")
 
         openssltemplate = (opensslworker_template.render(
             ipaddress="127.0.0.1"
@@ -93,15 +94,15 @@ try:
         with open('./tls/openssl.cnf', 'w') as openssl:
             openssl.write(openssltemplate)
 
-        print "Service account K8s"
-        subprocess.call(["openssl", "genrsa", "-out", "sa-"+(args.clustername)+"-k8s-key.pem", "2048"], cwd='./tls')
-        subprocess.call(["openssl", "req", "-new", "-key", "sa-"+(args.clustername)+"-k8s-key.pem", "-out", "sa-"+(args.clustername)+"-k8s-key.csr", "-subj", "/CN=sa:k8s", "-config", "openssl.cnf"], cwd='./tls')
-        subprocess.call(["openssl", "x509", "-req", "-in", "sa-"+(args.clustername)+"-k8s-key.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", "sa-"+(args.clustername)+"-k8s.pem", "-days", "365", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+        print("Service account K8s")
+        subprocess.call(["openssl", "genrsa", "-out", "sa-" + (args.clustername) + "-k8s-key.pem", "2048"], cwd='./tls')
+        subprocess.call(["openssl", "req", "-new", "-key", "sa-" + (args.clustername) + "-k8s-key.pem", "-out", "sa-" + (args.clustername) + "-k8s-key.csr", "-subj", "/CN=sa:k8s", "-config", "openssl.cnf"], cwd='./tls')
+        subprocess.call(["openssl", "x509", "-req", "-in", "sa-" + (args.clustername) + "-k8s-key.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", "sa-" + (args.clustername) + "-k8s.pem", "-days", "365", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
     # Create node certificates
     def createNodeCert(nodeip, k8srole):
         """Create Node certificates."""
-        print "received: " + nodeip
+        print("received: " + nodeip)
         if k8srole == "manager":
             openssltemplate = (opensslmanager_template.render(
                 floatingip1=args.floatingip1,
@@ -128,7 +129,7 @@ try:
 
     def createClientCert(user):
         """Create Client certificates."""
-        print "client: " + user
+        print("client: " + user)
         subprocess.call(["openssl", "genrsa", "-out", user + "-key.pem", "2048"], cwd='./tls')
         subprocess.call(["openssl", "req", "-new", "-key", user + "-key.pem", "-out", user + ".csr", "-subj", "/CN=" + user + "/O=system:masters", "-config", "openssl.cnf"], cwd='./tls')
         subprocess.call(["openssl", "x509", "-req", "-in", user + ".csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", user + ".pem", "-days", "365", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
@@ -142,7 +143,7 @@ try:
         with open('./tls/openssl.cnf', 'w') as openssl:
             openssl.write(openssltemplate)
 
-        print "Service account calico"
+        print("Service account calico")
         subprocess.call(["openssl", "genrsa", "-out", "sa-" + (args.clustername) + "-calico-key.pem", "2048"], cwd='./tls')
         subprocess.call(["openssl", "req", "-new", "-key", "sa-"+(args.clustername)+"-calico-key.pem", "-out", "sa-"+(args.clustername)+"-calico-key.csr", "-subj", "/CN=sa:calico", "-config", "openssl.cnf"], cwd='./tls')
         subprocess.call(["openssl", "x509", "-req", "-in", "sa-"+(args.clustername)+"-calico-key.csr", "-CA", "etcd-ca.pem", "-CAkey", "etcd-ca-key.pem", "-CAcreateserial", "-out", "sa-"+(args.clustername)+"-calico.pem", "-days", "365", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
@@ -179,6 +180,14 @@ try:
             randomsalt += random.choice(choices)
         cryptedPass = crypt.crypt(password, '$6$%s$' % randomsalt)
 
+    def generateRandomString():
+        """Generate a random String."""
+        rndstring = ""
+        choices = string.ascii_uppercase + string.digits + string.ascii_lowercase
+        for _ in range(0, 10):
+            rndstring += random.choice(choices)
+        return rndstring
+
     def returnPublicKey():
         """Retrieve rsa-ssh public key from OpenStack."""
         global rsakey
@@ -187,29 +196,29 @@ try:
 
     def printClusterInfo():
         """Print cluster info."""
-        print "-"*40+"\n\nCluster Info:"
-        print "Core password:\t" + str(password)
-        print "Keypair:\t" + str(rsakey)
-        print "k8s version:\t" + str(args.k8sver)
-        print "ETCD vers:\t" + str(args.etcdver)
-        print "Flannel vers:\t" + str(args.flannelver)
-        print "Clustername:\t" + str(args.clustername)
-        print "Cluster cidr:\t" + str(args.subnetcidr)
-        print "Pod Cidr:\t" + str(args.podcidr)
-        print "Managers:\t" + str(args.managers)
-        print "Workers:\t" + str(args.workers)
-        print "Manager flavor:\t" + str(args.managerimageflavor)
-        print "Worker flavor:\t" + str(args.workerimageflavor)
-        print "Glance imgname:\t" + str(args.glanceimagename)
-        print "VIP1:\t\t" + str(args.floatingip1)
-        print "VIP2:\t\t" + str(args.floatingip2)
-        print "Dnsserver:\t" + str(args.dnsserver)
-        print "Net overlay:\t" + str(args.netoverlay)
-        print "Auth mode:\t" + str(args.authmode)
-        print "alphafeatures:\t" + str(args.alphafeatures)
-        print "-"*40+"\n"
-        print "To start building the cluster: \tterraform init && terraform plan && terraform apply && sh snat_acl.sh"
-        print "To interact with the cluster: \tsh kubeconfig.sh"
+        print("-"*40+"\n\nCluster Info:")
+        print("Core password:\t" + str(password))
+        print("Keypair:\t" + str(rsakey))
+        print("k8s version:\t" + str(args.k8sver))
+        print("ETCD vers:\t" + str(args.etcdver))
+        print("Flannel vers:\t" + str(args.flannelver))
+        print("Clustername:\t" + str(args.clustername))
+        print("Cluster cidr:\t" + str(args.subnetcidr))
+        print("Pod Cidr:\t" + str(args.podcidr))
+        print("Managers:\t" + str(args.managers))
+        print("Workers:\t" + str(args.workers))
+        print("Manager flavor:\t" + str(args.managerimageflavor))
+        print("Worker flavor:\t" + str(args.workerimageflavor))
+        print("Glance imgname:\t" + str(args.glanceimagename))
+        print("VIP1:\t\t" + str(args.floatingip1))
+        print("VIP2:\t\t" + str(args.floatingip2))
+        print("Dnsserver:\t" + str(args.dnsserver))
+        print("Net overlay:\t" + str(args.netoverlay))
+        print("Auth mode:\t" + str(args.authmode))
+        print("alphafeatures:\t" + str(args.alphafeatures))
+        print("-"*40 + "\n")
+        print("To start building the cluster: \tterraform init && terraform plan && terraform apply && sh snat_acl.sh")
+        print("To interact with the cluster: \tsh kubeconfig.sh")
 
         clusterstatusconfig_template = (clusterstatus_template.render(
             etcdendpointsurls=iplist.rstrip(','),
