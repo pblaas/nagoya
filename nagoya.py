@@ -1,4 +1,5 @@
 #!/usr/bin/env python2.7
+"""Kubernetes cluster generator."""
 
 import argparse
 import os
@@ -9,7 +10,6 @@ import string
 import random
 from jinja2 import Environment, FileSystemLoader
 
-"""Kubernetes cluster generator."""
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
 __version__ = "0.3.6"
@@ -20,7 +20,6 @@ TEMPLATE_ENVIRONMENT = Environment(
     autoescape=False,
     loader=FileSystemLoader(os.path.join(PATH, '.')),
     trim_blocks=True)
-
 
 # Testing if environment variables are available.
 if "OS_USERNAME" not in os.environ:
@@ -267,6 +266,7 @@ try:
     # Create core user passowrd
     generatePassword()
     returnPublicKey()
+    etcdtoken = generateRandomString()
 
     # Required for Calico yaml
     base64buff = open('./tls/etcd-ca.pem', 'rU').read()
@@ -313,6 +313,7 @@ try:
             dnsserver=args.dnsserver,
             etcdendpointsurls=iplist.rstrip(','),
             etcdid=(node - 10),
+            etcdtoken=etcdtoken,
             initialclusterlist=initialclusterlist.rstrip(','),
             floatingip1=args.floatingip1,
             k8sver=args.k8sver,
@@ -346,6 +347,7 @@ try:
             dnsserver=args.dnsserver,
             etcdendpointsurls=iplist.rstrip(','),
             etcdid=(node - 10),
+            etcdtoken=etcdtoken,
             initialclusterlist=initialclusterlist.rstrip(','),
             floatingip1=args.floatingip1,
             k8sver=args.k8sver,

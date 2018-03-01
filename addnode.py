@@ -1,4 +1,5 @@
 #!/usr/bin/env python2.7
+"""Kubernetes cluster generator - addnode."""
 
 import argparse
 import os
@@ -6,7 +7,6 @@ import subprocess
 import base64
 from jinja2 import Environment, FileSystemLoader
 
-"""Kubernetes cluster generator - addnode."""
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
 __version__ = "0.0.5"
