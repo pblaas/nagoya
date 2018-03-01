@@ -3,7 +3,7 @@ Next development iteration of my terraformed kubernetes deploy scripts to produc
 
 This project has a lot of similarities to project kioto but differs on the following:
 * nagoya is based on etcd3
-* nagoya is based on Cloud Linux Configs instead of CloudConfig files
+* nagoya is based on Container Linux Configs instead of CloudConfig files
 
 ### Usage:
 ```
@@ -66,9 +66,9 @@ optional arguments:
 
 #### Features
 * HA manager K8S setup.
-* PKI on ETCD cluster.
+* PKI on etcd cluster.
 * PKI on K8S nodes.
-* RBAC authorization mode.
+* RBAC authorization mode support.
 * NodeRestriction admission control.
 * OpenStack provider for Storage through Cinder plugin.
 * Loadbalancing k8s managers through OpenStack (LBAAS).
