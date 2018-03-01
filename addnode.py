@@ -1,10 +1,4 @@
 #!/usr/bin/env python2.7
-"""Kubernetes cluster generator - addnode."""
-__author__ = "Patrick Blaas <patrick@kite4fun.nl>"
-__license__ = "GPL v3"
-__version__ = "0.0.4"
-__status__ = "Active"
-
 
 import argparse
 import os
@@ -12,12 +6,17 @@ import subprocess
 import base64
 from jinja2 import Environment, FileSystemLoader
 
+"""Kubernetes cluster generator - addnode."""
+__author__ = "Patrick Blaas <patrick@kite4fun.nl>"
+__license__ = "GPL v3"
+__version__ = "0.0.5"
+__status__ = "Active"
+
 PATH = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_ENVIRONMENT = Environment(
     autoescape=False,
     loader=FileSystemLoader(os.path.join(PATH, '.')),
     trim_blocks=True)
-
 
 # Testing if environment variables are available.
 if "OS_USERNAME" not in os.environ:
@@ -47,22 +46,21 @@ opensslmanager_template = TEMPLATE_ENVIRONMENT.get_template('./tls/openssl.cnf.t
 additional_node_template = TEMPLATE_ENVIRONMENT.get_template('additional_node.tf.tmpl')
 opensslworker_template = TEMPLATE_ENVIRONMENT.get_template('./tls/openssl-worker.cnf.tmpl')
 
-
 try:
     # Create node certificates
     def createNodeCert(nodeip, k8srole):
         """Create Node certificates."""
-        print "received: " + nodeip
+        print("received: " + nodeip)
         if k8srole == "manager":
             openssltemplate = (opensslmanager_template.render(
                 floatingip1=args.floatingip1,
                 ipaddress=nodeip,
-                loadbalancer=(args.subnetcidr).rsplit('.', 1)[0]+".3"
-                ))
+                loadbalancer=(args.subnetcidr).rsplit('.', 1)[0] + ".3"
+            ))
         else:
             openssltemplate = (opensslworker_template.render(
                 ipaddress=nodeip,
-                ))
+            ))
 
         with open('./tls/openssl.cnf', 'w') as openssl:
             openssl.write(openssltemplate)
@@ -79,7 +77,7 @@ try:
 
     def configTranspiler(nodeip):
         """Create json file from yaml content."""
-        subprocess.call(["./ct", "-files-dir=tls", "-in-file", "node_"+nodeip+".yaml", "-out-file", "node_"+nodeip+".json", "-pretty"])
+        subprocess.call(["./ct", "-files-dir=tls", "-in-file", "node_" + nodeip + ".yaml", "-out-file", "node_" + nodeip + ".json", "-pretty"])
 
     base64buffer = open('./tls/etcd-ca.pem', 'rU').read()
     ETCDCAPEM = base64.b64encode(base64buffer)
@@ -134,11 +132,11 @@ try:
                 subnetcidr=subnetcidr,
                 cidr=podcidr,
                 ipaddress=lanip,
-                ipaddressgw=subnetcidr.rsplit('.', 1)[0]+".1",
-                loadbalancer=subnetcidr.rsplit('.', 1)[0]+".3",
+                ipaddressgw=subnetcidr.rsplit('.', 1)[0] + ".1",
+                loadbalancer=subnetcidr.rsplit('.', 1)[0] + ".3",
                 cryptedPass=cryptedPass,
                 sshkey=sshkey,
-                ))
+            ))
 
             with open(nodeyaml, 'w') as worker:
                 worker.write(worker_template)
@@ -151,7 +149,7 @@ try:
                 keypair=keypair,
                 subnetcidr=subnetcidr,
                 octet=lanip.rsplit('.', 1)[1]
-                ))
+            ))
 
             with open("k8s.tf", 'a') as k8stf:
                 k8stf.write(additional_node)
@@ -161,4 +159,4 @@ try:
 except Exception as e:
     raise
 else:
-    print "Done"
+    print("Done")
