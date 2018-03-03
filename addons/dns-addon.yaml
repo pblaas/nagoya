@@ -1,4 +1,14 @@
 apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    k8s-app: kube-dns
+  name: kube-dns
+  namespace: kube-system
+
+  ---
+
+apiVersion: v1
 kind: Service
 metadata:
   name: kube-dns
@@ -123,3 +133,4 @@ spec:
         - containerPort: 8080
           protocol: TCP
       dnsPolicy: Default
+      serverAccountName: kube-dns
