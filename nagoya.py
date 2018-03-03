@@ -119,7 +119,7 @@ try:
 
         nodeoctet = nodeip.rsplit('.')[3]
         subprocess.call(["openssl", "genrsa", "-out", nodeip + "-k8s-node-key.pem", "2048"], cwd='./tls')
-        subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-k8s-node-key.pem", "-out", nodeip + "-k8s-node.csr", "-subj", "/CN=system:node:k8s-" + str(args.clustername) + "-node" + str(nodeoctet) + "/O=system:nodes/O=system:node-proxier", "-config", "openssl.cnf"], cwd='./tls')
+        subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-k8s-node-key.pem", "-out", nodeip + "-k8s-node.csr", "-subj", "/CN=system:node:k8s-" + str(args.clustername) + "-node" + str(nodeoctet) + "/O=system:nodes", "-config", "openssl.cnf"], cwd='./tls')
         subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-node.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-node.pem", "-days", "365", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
         # ${i}-etcd-worker.pem
