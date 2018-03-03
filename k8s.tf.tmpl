@@ -257,6 +257,7 @@ resource "openstack_compute_floatingip_associate_v2" "fip_{{ clustername }}_f2" 
 
 
 resource "openstack_lb_monitor_v2" "{{ clustername }}_monitor_1" {
+  name        = "{{ clustername }}_monitor_1"
   pool_id     = "${openstack_lb_pool_v2.{{ clustername }}_pool_1.id}"
   type        = "PING"
   delay       = 20
@@ -300,6 +301,7 @@ resource "openstack_lb_member_v2" "{{ clustername }}_member_1_{{ loop.index }}" 
 ### Create worker loadbalancer for external traffic.
 
 resource "openstack_lb_monitor_v2" "{{ clustername }}_monitor_2" {
+  name        = "{{ clustername }}_monitor_2"
   pool_id     = "${openstack_lb_pool_v2.{{ clustername }}_pool_2.id}"
   type        = "PING"
   delay       = 20
