@@ -423,7 +423,7 @@ storage:
               - --kubelet-client-certificate=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node.pem
               - --kubelet-client-key=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node-key.pem
               - --anonymous-auth=false
-{% if authmode == "true" %}
+{% if rbac == "true" %}
               - --authorization-mode=Node,RBAC
 {% else %}
               - --authorization-mode=AlwaysAllow

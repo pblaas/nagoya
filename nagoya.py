@@ -56,7 +56,7 @@ parser.add_argument("--k8sver", help="Hyperkube version - (v1.9.3_coreos.0)", de
 parser.add_argument("--etcdver", help="ETCD version - (3.3.1)", default="3.3.1")
 parser.add_argument("--flannelver", help="Flannel image version - (0.10.0)", default="0.10.0")
 parser.add_argument("--netoverlay", help="Network overlay - (flannel)", default="flannel")
-parser.add_argument("--authmode", help="Authorization mode - (false)", default="false")
+parser.add_argument("--rbac", help="RBAC mode - (false)", default="false")
 parser.add_argument("--apidebuglevel", help="Api DebugLevel - (1)", type=int, default=1)
 parser.add_argument("--alphafeatures", help="enable alpha feature - (false)", default="false")
 args = parser.parse_args()
@@ -214,7 +214,7 @@ try:
         print("VIP2:\t\t" + str(args.floatingip2))
         print("Dnsserver:\t" + str(args.dnsserver))
         print("Net overlay:\t" + str(args.netoverlay))
-        print("Auth mode:\t" + str(args.authmode))
+        print("RBAC mode:\t" + str(args.rbac))
         print("alphafeatures:\t" + str(args.alphafeatures))
         print("-" * 40 + "\n")
         print("To start building the cluster: \tterraform init && terraform plan && terraform apply && sh snat_acl.sh")
@@ -235,7 +235,7 @@ try:
             floatingip2=args.floatingip2,
             dnsserver=args.dnsserver,
             netoverlay=args.netoverlay,
-            authmode=args.authmode,
+            rbac=args.rbac,
             cloudprovider=args.cloudprovider,
             podcidr=args.podcidr,
             flannelver=args.flannelver,
@@ -323,7 +323,7 @@ try:
             etcdver=args.etcdver,
             netoverlay=args.netoverlay,
             cloudprovider=args.cloudprovider,
-            authmode=args.authmode,
+            rbac=args.rbac,
             clustername=args.clustername,
             subnetcidr=args.subnetcidr,
             podcidr=args.podcidr,
@@ -358,7 +358,7 @@ try:
             flannelver=args.flannelver,
             netoverlay=args.netoverlay,
             cloudprovider=args.cloudprovider,
-            authmode=args.authmode,
+            rbac=args.rbac,
             clustername=args.clustername,
             subnetcidr=args.subnetcidr,
             podcidr=args.podcidr,
