@@ -423,8 +423,12 @@ storage:
               - --kubelet-client-certificate=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node.pem
               - --kubelet-client-key=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node-key.pem
               - --anonymous-auth=false
-              - --authorization-mode={{ authmode }}
-              - --v=1
+{% if authmode == "true" %}
+              - --authorization-mode=Node,RBAC
+{% else %}
+              - --authorization-mode=AlwaysAllow
+{% endif %}
+              - --v={{ apidebuglevel }}
               - --cloud-provider={{ cloudprovider }}
               - --cloud-config=/etc/kubernetes/ssl/cloud.conf
               livenessProbe:

@@ -56,7 +56,8 @@ parser.add_argument("--k8sver", help="Hyperkube version - (v1.9.3_coreos.0)", de
 parser.add_argument("--etcdver", help="ETCD version - (3.3.1)", default="3.3.1")
 parser.add_argument("--flannelver", help="Flannel image version - (0.10.0)", default="0.10.0")
 parser.add_argument("--netoverlay", help="Network overlay - (flannel)", default="flannel")
-parser.add_argument("--authmode", help="Authorization mode - (AlwaysAllow)", default="AlwaysAllow")
+parser.add_argument("--authmode", help="Authorization mode - (false)", default="false")
+parser.add.argument("--apidebuglevel", help="Api DebugLevel - (1)", type=int, default=1)
 parser.add_argument("--alphafeatures", help="enable alpha feature - (false)", default="false")
 args = parser.parse_args()
 
@@ -308,6 +309,7 @@ try:
         manager_template = (cloudconf_template.render(
             cryptedPass=cryptedPass,
             sshkey=rsakey,
+            apidebuglevel=args.apidebuglevel,
             managers=args.managers,
             workers=args.workers,
             dnsserver=args.dnsserver,
@@ -344,6 +346,7 @@ try:
             workers=args.workers,
             cryptedPass=cryptedPass,
             sshkey=rsakey,
+            apidebuglevel=args.apidebuglevel,
             dnsserver=args.dnsserver,
             etcdendpointsurls=iplist.rstrip(','),
             etcdid=(node - 10),
