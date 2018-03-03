@@ -6,7 +6,7 @@ metadata:
   name: kube-dns
   namespace: kube-system
 
-  ---
+---
 
 apiVersion: v1
 kind: Service
@@ -133,4 +133,4 @@ spec:
         - containerPort: 8080
           protocol: TCP
       dnsPolicy: Default
-      serverAccountName: kube-dns
+      serviceAccountName: kube-dns
