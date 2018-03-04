@@ -7,7 +7,6 @@ This project has a lot of similarities to project kioto but differs on the follo
 
 ### Usage:
 ```
-./nagoya.py --help
 usage: nagoya.py [-h] [--corepassword COREPASSWORD] [--username USERNAME]
                  [--projectname PROJECTNAME] [--clustername CLUSTERNAME]
                  [--subnetcidr SUBNETCIDR] [--podcidr PODCIDR]
@@ -17,7 +16,8 @@ usage: nagoya.py [-h] [--corepassword COREPASSWORD] [--username USERNAME]
                  [--glanceimagename GLANCEIMAGENAME] [--dnsserver DNSSERVER]
                  [--cloudprovider CLOUDPROVIDER] [--k8sver K8SVER]
                  [--etcdver ETCDVER] [--flannelver FLANNELVER]
-                 [--netoverlay NETOVERLAY] [--authmode AUTHMODE]
+                 [--netoverlay NETOVERLAY] [--rbac RBAC]
+                 [--apidebuglevel APIDEBUGLEVEL]
                  [--alphafeatures ALPHAFEATURES]
                  keypair floatingip1 floatingip2
 
@@ -47,19 +47,20 @@ optional arguments:
   --workerimageflavor WORKERIMAGEFLAVOR
                         Worker image flavor ID - (2008)
   --glanceimagename GLANCEIMAGENAME
-                        Glance image name ID - (Container Linux CoreOS (third-
-                        party))
+                        Glance image name ID - (Container-Linux_1632)
   --dnsserver DNSSERVER
                         DNS server - (8.8.8.8)
   --cloudprovider CLOUDPROVIDER
                         Cloud provider support - (openstack)
-  --k8sver K8SVER       Hyperkube version - (v1.8.7_coreos.0)
+  --k8sver K8SVER       Hyperkube version - (v1.9.3_coreos.0)
   --etcdver ETCDVER     ETCD version - (3.3.1)
   --flannelver FLANNELVER
                         Flannel image version - (0.10.0)
   --netoverlay NETOVERLAY
                         Network overlay - (flannel)
-  --authmode AUTHMODE   Authorization mode - (AlwaysAllow)
+  --rbac RBAC           RBAC mode - (false)
+  --apidebuglevel APIDEBUGLEVEL
+                        Api DebugLevel - (1)
   --alphafeatures ALPHAFEATURES
                         enable alpha feature - (false)
 ```
