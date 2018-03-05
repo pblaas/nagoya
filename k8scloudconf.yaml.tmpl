@@ -208,7 +208,8 @@ systemd:
         --client-ca-file=/etc/kubernetes/ssl/ca.pem \
         --anonymous-auth=false \
         --cloud-provider={{ cloudprovider }} \
-        --cloud-config=/etc/kubernetes/cloud.conf
+        --cloud-config=/etc/kubernetes/cloud.conf \
+        --http-check-frequency=60s
         ExecStop=-/usr/bin/rkt stop --uuid-file=/var/run/kubelet-pod.uuid
         Restart=always
         RestartSec=10
