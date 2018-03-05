@@ -208,8 +208,7 @@ systemd:
         --client-ca-file=/etc/kubernetes/ssl/ca.pem \
         --anonymous-auth=false \
         --cloud-provider={{ cloudprovider }} \
-        --cloud-config=/etc/kubernetes/cloud.conf \
-        --node-status-update-frequency=20s
+        --cloud-config=/etc/kubernetes/cloud.conf
         ExecStop=-/usr/bin/rkt stop --uuid-file=/var/run/kubelet-pod.uuid
         Restart=always
         RestartSec=10
@@ -534,7 +533,6 @@ storage:
               - --root-ca-file=/etc/kubernetes/ssl/ca.pem
               - --cloud-provider={{ cloudprovider }}
               - --cloud-config=/etc/kubernetes/ssl/cloud.conf
-              - --node-monitor-period=15s
               - --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml
               resources:
                 requests:
