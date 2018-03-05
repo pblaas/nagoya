@@ -486,6 +486,7 @@ storage:
               - --cluster-cidr=10.244.0.0/16
               - --conntrack-max-per-core=0
               - --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml
+              - --v={{ apidebuglevel }}
               securityContext:
                 privileged: true
               volumeMounts:
@@ -534,6 +535,7 @@ storage:
               - --cloud-provider={{ cloudprovider }}
               - --cloud-config=/etc/kubernetes/ssl/cloud.conf
               - --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml
+              - --v={{ apidebuglevel }}
               resources:
                 requests:
                   cpu: 200m
@@ -579,6 +581,7 @@ storage:
               - --master=http://127.0.0.1:8080
               - --leader-elect=true
               - --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml
+              - --v={{ apidebuglevel }}
               resources:
                 requests:
                   cpu: 100m
