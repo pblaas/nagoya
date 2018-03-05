@@ -209,7 +209,8 @@ systemd:
         --anonymous-auth=false \
         --cloud-provider={{ cloudprovider }} \
         --cloud-config=/etc/kubernetes/cloud.conf \
-        --http-check-frequency=60s
+        --http-check-frequency=60s \
+        --node-status-update-frequency=20s
         ExecStop=-/usr/bin/rkt stop --uuid-file=/var/run/kubelet-pod.uuid
         Restart=always
         RestartSec=10
@@ -537,6 +538,8 @@ storage:
               - --cloud-config=/etc/kubernetes/ssl/cloud.conf
               - --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml
               - --v={{ apidebuglevel }}
+              - --node-monitor-grace-period=80s
+              - --node-monitor-period=10s
               resources:
                 requests:
                   cpu: 200m
