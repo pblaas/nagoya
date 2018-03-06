@@ -188,9 +188,11 @@ systemd:
         --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml \
         --require-kubeconfig \
 {% if isworker != 1 %}
+        --node-labels=node-role.kubernetes.io/master=true
         --register-schedulable=false \
 {% else %}
         --register-node=true \
+        --node-labels=node-role.kubernetes.io/worker=true
 {% endif %}
 {% if netoverlay == "calico" %}
         --cni-conf-dir=/etc/cni/net.d \
@@ -209,8 +211,9 @@ systemd:
         --anonymous-auth=false \
         --cloud-provider={{ cloudprovider }} \
         --cloud-config=/etc/kubernetes/cloud.conf \
-        --http-check-frequency=60s \
-        --node-status-update-frequency=20s
+        --http-check-frequency=20s \
+        --node-status-update-frequency=30s \
+        --volume-stats-agg-period=2m0s
         ExecStop=-/usr/bin/rkt stop --uuid-file=/var/run/kubelet-pod.uuid
         Restart=always
         RestartSec=10
@@ -538,7 +541,7 @@ storage:
               - --cloud-config=/etc/kubernetes/ssl/cloud.conf
               - --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml
               - --v={{ apidebuglevel }}
-              - --node-monitor-grace-period=80s
+              - --node-monitor-grace-period=120s
               - --node-monitor-period=10s
               resources:
                 requests:
