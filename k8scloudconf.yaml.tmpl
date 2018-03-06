@@ -188,11 +188,11 @@ systemd:
         --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml \
         --require-kubeconfig \
 {% if isworker != 1 %}
-        --node-labels=node-role.kubernetes.io/master=true
+        --node-labels=node-role.kubernetes.io/master=true \
         --register-schedulable=false \
 {% else %}
         --register-node=true \
-        --node-labels=node-role.kubernetes.io/worker=true
+        --node-labels=node-role.kubernetes.io/worker=true \
 {% endif %}
 {% if netoverlay == "calico" %}
         --cni-conf-dir=/etc/cni/net.d \
