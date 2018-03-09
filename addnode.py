@@ -137,7 +137,6 @@ try:
                 loadbalancer=subnetcidr.rsplit('.', 1)[0] + ".3",
                 cryptedPass=cryptedPass,
                 sshkey=sshkey,
-                availabilityzone=availabilityzone
             ))
 
             with open(nodeyaml, 'w') as worker:
@@ -150,7 +149,8 @@ try:
                 glanceimagename=args.glanceimagename,
                 keypair=keypair,
                 subnetcidr=subnetcidr,
-                octet=lanip.rsplit('.', 1)[1]
+                octet=lanip.rsplit('.', 1)[1],
+                availabilityzone=availabilityzone
             ))
 
             with open("k8s.tf", 'a') as k8stf:
