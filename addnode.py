@@ -114,6 +114,7 @@ try:
             etcdver = str(fh[17].split("\t")[1])[:-1]
             cryptedPass = str(fh[20].split("\t")[1])[:-1]
             sshkey = str(fh[18].split("\t")[2])[:-1]
+            availabilityzone = str(fh[21].split("\t")[1])[:-1]
 
             createNodeCert(lanip, "worker")
             worker_template = (cloudconf_template.render(
@@ -136,6 +137,7 @@ try:
                 loadbalancer=subnetcidr.rsplit('.', 1)[0] + ".3",
                 cryptedPass=cryptedPass,
                 sshkey=sshkey,
+                availabilityzone=availabilityzone
             ))
 
             with open(nodeyaml, 'w') as worker:

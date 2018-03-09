@@ -12,7 +12,7 @@ resource "openstack_networking_port_v2" "k8s_{{ clustername }}_port_{{ octet }}"
 
 resource "openstack_compute_instance_v2" "k8s-{{ clustername }}-node{{ octet }}" {
   name      = "k8s-{{ clustername }}-node{{ octet }}"
-  availability_zone = "AMS-EQ1"
+  availability_zone = "{{ availabilityzone }}"
   image_name  = "{{ glanceimagename }}"
   flavor_id = "{{ workerimageflavor }}"
   key_pair  = "{{ keypair }}"

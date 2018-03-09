@@ -59,6 +59,8 @@ parser.add_argument("--netoverlay", help="Network overlay - (flannel)", default=
 parser.add_argument("--rbac", help="RBAC mode - (false)", default="false")
 parser.add_argument("--apidebuglevel", help="Api DebugLevel - (1)", type=int, default=1)
 parser.add_argument("--alphafeatures", help="enable alpha feature - (false)", default="false")
+parser.add_argument("--availabilityzone", help="Availability zone - (AMS-EQ1)", default="AMS-EQ1")
+parser.add_argument("--externalnetid", help="External network id - (f9c73cd5-9e7b-4bfd-89eb-c2f4f584c326)", default="f9c73cd5-9e7b-4bfd-89eb-c2f4f584c326")
 args = parser.parse_args()
 
 template = TEMPLATE_ENVIRONMENT.get_template('k8s.tf.tmpl')
@@ -242,7 +244,9 @@ try:
             etcdver=args.etcdver,
             keypair=args.keypair,
             rsakey=rsakey,
-            cryptedpass=cryptedPass
+            cryptedpass=cryptedPass,
+            availabilityzone=args.availabilityzone,
+            externalnetid=args.externalnetid,
         ))
 
         with open('cluster.status', 'w') as k8sstat:
@@ -299,6 +303,8 @@ try:
         glanceimagename=args.glanceimagename,
         floatingip1=args.floatingip1,
         floatingip2=args.floatingip2,
+        availabilityzone=args.availabilityzone,
+        externalnetid=args.externalnetid,
     ))
 
     for node in range(10, args.managers + 10):

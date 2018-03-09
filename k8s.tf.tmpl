@@ -19,7 +19,7 @@ resource "openstack_networking_subnet_v2" "subnet_{{ clustername }}" {
 
 resource "openstack_networking_router_v2" "k8s_{{ clustername }}_router" {
   name             = "k8s_{{ clustername }}_router"
-  external_network_id = "f9c73cd5-9e7b-4bfd-89eb-c2f4f584c326"
+  external_network_id = "{{ externalnetid }}"
 }
 
 resource "openstack_networking_router_interface_v2" "k8s_{{ clustername }}_router_interface" {
@@ -190,7 +190,7 @@ resource "openstack_networking_port_v2" "k8s_{{ clustername }}_port_{{ counter +
 
 resource "openstack_compute_instance_v2" "k8s-{{ clustername }}-node{{ counter + loop.index -1 }}" {
   name      = "k8s-{{ clustername }}-node{{ counter + loop.index - 1 }}"
-  availability_zone = "AMS-EQ1"
+  availability_zone = "{{ availabilityzone }}"
   image_name  = "{{ glanceimagename }}"
   flavor_id = "{{ managerimageflavor }}"
   key_pair  = "{{ keypair }}"
@@ -224,7 +224,7 @@ resource "openstack_networking_port_v2" "k8s_{{ clustername }}_port_{{ counter +
 
 resource "openstack_compute_instance_v2" "k8s-{{ clustername }}-node{{ counter + loop.index -1 }}" {
   name      = "k8s-{{ clustername }}-node{{ counter + loop.index - 1 }}"
-  availability_zone = "AMS-EQ1"
+  availability_zone = "{{ availabilityzone }}"
   image_name  = "{{ glanceimagename }}"
   flavor_id = "{{ workerimageflavor }}"
   key_pair  = "{{ keypair }}"
