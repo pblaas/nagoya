@@ -86,3 +86,7 @@ If you are using this script without my managment container (pblaas/openstack-cl
 * export OS_TENANT_NAME=$OS_PROJECT_NAME
 
 Make sure you have current version of the openstack CLI tool which is used during the deployment by the Python script.
+
+Please note that these scripts use some static configuration defaults, like the floating network gateway id which are specific for the OpenStack API server on https://cloudvps.com.
+You're environment may use other defaults. Please let me know if you need to change anything to make this work on your end, not being on cloudvps.com so I can update the scripts and define this in provided params.
+
