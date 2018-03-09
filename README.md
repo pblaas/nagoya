@@ -19,6 +19,8 @@ usage: nagoya.py [-h] [--corepassword COREPASSWORD] [--username USERNAME]
                  [--netoverlay NETOVERLAY] [--rbac RBAC]
                  [--apidebuglevel APIDEBUGLEVEL]
                  [--alphafeatures ALPHAFEATURES]
+                 [--availabilityzone AVAILABILITYZONE]
+                 [--externalnetid EXTERNALNETID]
                  keypair floatingip1 floatingip2
 
 positional arguments:
@@ -63,6 +65,11 @@ optional arguments:
                         Api DebugLevel - (1)
   --alphafeatures ALPHAFEATURES
                         enable alpha feature - (false)
+  --availabilityzone AVAILABILITYZONE
+                        Availability zone - (AMS-EQ1)
+  --externalnetid EXTERNALNETID
+                        External network id - (f9c73cd5-9e7b-4bfd-89eb-
+                        c2f4f584c326)
 ```
 
 #### Features
@@ -87,6 +94,5 @@ If you are using this script without my managment container (pblaas/openstack-cl
 
 Make sure you have current version of the openstack CLI tool which is used during the deployment by the Python script.
 
-Please note that these scripts use some static configuration defaults, like the floating network gateway id which are specific for the OpenStack API server on https://cloudvps.com.
 You're environment may use other defaults. Please let me know if you need to change anything to make this work on your end, not being on cloudvps.com so I can update the scripts and define this in provided params.
 
