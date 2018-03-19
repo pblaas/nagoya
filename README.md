@@ -49,7 +49,7 @@ optional arguments:
   --workerimageflavor WORKERIMAGEFLAVOR
                         Worker image flavor ID - (2008)
   --glanceimagename GLANCEIMAGENAME
-                        Glance image name ID - (Container-Linux_1632)
+                        Glance image name ID - (Container Linux CoreOS (third-party))
   --dnsserver DNSSERVER
                         DNS server - (8.8.8.8)
   --cloudprovider CLOUDPROVIDER
