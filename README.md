@@ -1,5 +1,5 @@
 # nagoya
-Next development iteration of my terraformed kubernetes deploy scripts to produce Cloud Linux config files for boostrapping Kubernetes on OpenStack.
+Next development iteration of my terraformed kubernetes deploy scripts to produce Container Linux config files and Terraform files for boostrapping Kubernetes on OpenStack.
 
 This project has a lot of similarities to project kioto but differs on the following:
 * nagoya is based on etcd3
