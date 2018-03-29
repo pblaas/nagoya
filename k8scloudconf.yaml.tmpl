@@ -280,7 +280,8 @@ storage:
             "name": "podnet",
             "type": "flannel",
             "delegate": {
-              "isDefaultGateway": true
+              "isDefaultGateway": true,
+              "hairpinMode": true
             }
           }
     - filesystem: "root"
