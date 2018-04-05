@@ -186,7 +186,6 @@ systemd:
 {% endif %}
         ExecStart=/usr/lib/coreos/kubelet-wrapper \
         --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml \
-        --require-kubeconfig \
 {% if isworker != 1 %}
         --node-labels=node-role.kubernetes.io/master=true \
         --register-schedulable=false \
