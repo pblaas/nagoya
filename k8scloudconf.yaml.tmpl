@@ -176,6 +176,8 @@ systemd:
         --mount volume=cni-net,target=/etc/cni/net.d \
         --volume cni-bin,kind=host,source=/opt/cni/bin \
         --mount volume=cni-bin,target=/opt/cni/bin \
+        --volume cni-varlib,kind=host,source=/var/lib/calico \
+        --mount volume=cni-varlib,target=/var/lib/calico \
 {% endif %}
         --hosts-entry=host"
         ExecStartPre=/usr/bin/mkdir -p /etc/kubernetes/manifests
