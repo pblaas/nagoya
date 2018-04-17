@@ -48,7 +48,7 @@ docker:
   flags:
     - --debug
 
-{% if netoverlay == "calico" %}
+{% if netoverlay != "calico" %}
 flannel:
   interface: {{ ipaddress }}
   version: "{{ flannelver }}"
