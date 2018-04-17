@@ -48,6 +48,7 @@ docker:
   flags:
     - --debug
 
+{% if netoverlay == "calico" %}
 flannel:
   interface: {{ ipaddress }}
   version: "{{ flannelver }}"
@@ -56,7 +57,7 @@ flannel:
   etcd_keyfile: /etc/ssl/certs/{{ ipaddress }}-etcd-node-key.pem
   etcd_certfile: /etc/ssl/certs/{{ ipaddress }}-etcd-node.pem
   etcd_cafile: /etc/ssl/certs/etcd-ca.pem
-
+{% endif %}
 
 systemd:
   units:
