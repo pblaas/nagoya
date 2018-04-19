@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.8"
+__version__ = "0.3.9"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -218,6 +218,7 @@ try:
         print("Net overlay:\t" + str(args.netoverlay))
         print("RBAC mode:\t" + str(args.rbac))
         print("alphafeatures:\t" + str(args.alphafeatures))
+        print("apidebuglevel:\t" + str(args.apidebuglevel))
         print("-" * 40 + "\n")
         print("To start building the cluster: \tterraform init && terraform plan && terraform apply && sh snat_acl.sh")
         print("To interact with the cluster: \tsh kubeconfig.sh")
@@ -247,6 +248,7 @@ try:
             cryptedpass=cryptedPass,
             availabilityzone=args.availabilityzone,
             externalnetid=args.externalnetid,
+            apidebuglevel=args.apidebuglevel
         ))
 
         with open('cluster.status', 'w') as k8sstat:

@@ -9,7 +9,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.0.5"
+__version__ = "0.0.6"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -115,6 +115,7 @@ try:
             cryptedPass = str(fh[20].split("\t")[1])[:-1]
             sshkey = str(fh[18].split("\t")[2])[:-1]
             availabilityzone = str(fh[21].split("\t")[2])[:-1]
+            apidebuglevel = str(fh[23].split("\t")[1])[:-1]
 
             createNodeCert(lanip, "worker")
             worker_template = (cloudconf_template.render(
