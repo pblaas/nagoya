@@ -138,6 +138,7 @@ try:
                 loadbalancer=subnetcidr.rsplit('.', 1)[0] + ".3",
                 cryptedPass=cryptedPass,
                 sshkey=sshkey,
+                apidebuglevel=apidebuglevel
             ))
 
             with open(nodeyaml, 'w') as worker:
