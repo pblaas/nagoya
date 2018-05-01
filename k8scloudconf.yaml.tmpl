@@ -171,8 +171,8 @@ systemd:
         --mount volume=var-log,target=/var/log \
         --volume dns,kind=host,source=/etc/resolv.conf \
         --mount volume=dns,target=/etc/resolv.conf \
-        --volume k8stmp,kind=host,source=/tmp/k8stmp \
-        --mount volume=k8stmp,target=/tmp/k8stmp \
+        --volume coreos-tmp,kind=host,source=/tmp \
+        --mount volume=coreos-tmp,target=/tmp \
 {% if netoverlay == "calico" %}
         --volume cni-net,kind=host,source=/etc/cni/net.d \
         --mount volume=cni-net,target=/etc/cni/net.d \
