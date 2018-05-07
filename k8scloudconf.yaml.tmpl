@@ -189,6 +189,7 @@ systemd:
 {% if netoverlay == "calico" %}
         ExecStartPre=/usr/bin/mkdir -p /opt/cni/bin
         ExecStartPre=/usr/bin/mkdir -p /etc/cni/net.d
+        ExecStartPre=/usr/bin/mkdir -p /var/lib/calico
 {% endif %}
         ExecStart=/usr/lib/coreos/kubelet-wrapper \
         --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml \
