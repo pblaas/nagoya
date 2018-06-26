@@ -11,16 +11,16 @@ This project has a lot of similarities to project kioto but differs on the follo
 To get started with this nagoya script to deploy a high available kubernetes cluster you can follow the following guide lines:
 1. Make sure you have loaded the OpenStack environment variables and can talk with the OpenStack API with tools like openstack and nova. You can also use a docker container for this: docker.io/pblaas/openstack-cli:latest.
 2. Request two new floating ip adresses,
-  `openstack floating ip create floating`
+  * `openstack floating ip create floating`
 3. Run the nagoya script. When deploying your first cluster you don't have to use all the available flags. The script will prepare the terraform config file and the Ignition files for CoreOS Container Linux.
-  `./nagoya.py "YOURKEYPAIR_NAME" "FIRSTFLOATINGIP" "SECONDFLOATINGIP" --workers 3`
+  * `./nagoya.py "YOURKEYPAIR_NAME" "FIRSTFLOATINGIP" "SECONDFLOATINGIP" --workers 3`
 4. Optional verify the result status information if it matches your desired cluster spec. If not to your liking run the command again with additional or altered flags.
 5. Instruct terraform to apply the config on OpenStack. You should add this as a onliner to make sure the snat permissions are properly set and the OS has connectivity to the internet and bootstrap properly.
-  `terraform init && terraform plan && terraform apply && sh snat_acl.sh`
+  * `terraform init && terraform plan && terraform apply && sh snat_acl.sh`
 6. Load the generated kubernetes config
-  `sh kubeconfig.sh`
+  * `sh kubeconfig.sh`
 7. You can run a watch comment and see when the cluster will come online. This could take a couple of minutes.
-  `watch kubectl get nodes`
+  * `watch kubectl get nodes`
 
 You should now have a fully functional kubernetes cluster which is fully compliant with conformance tests. To test conformance you can use a free available service by Heptio: https://scanner.heptio.com/
 
