@@ -21,7 +21,7 @@ To get started with this nagoya script to deploy a high available kubernetes clu
   * `terraform init && terraform plan && terraform apply && sh snat_acl.sh`
 7. Load the generated kubernetes config
   * `sh kubeconfig.sh`
-8. You can run a watch comment and see when the cluster will come online. This could take a couple of minutes.
+8. You can run a watch command and see when the cluster will come online. This could take a couple of minutes.
   * `watch kubectl get nodes`
 
 You should now have a fully functional kubernetes cluster which is fully compliant with conformance tests. To test conformance you can use a free available service by Heptio: https://scanner.heptio.com/
