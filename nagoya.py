@@ -46,7 +46,7 @@ parser.add_argument("--clustername", help="Clustername - (k8scluster)", default=
 parser.add_argument("--subnetcidr", help="Private subnet CIDR - (192.168.3.0/24)", default="192.168.3.0/24")
 parser.add_argument("--podcidr", help="Pod subnet CIDR - (10.244.0.0/16)", default="10.244.0.0/16")
 parser.add_argument("--managers", help="Number of k8s managers - (3)", type=int, default=3)
-parser.add_argument("--workers", help="Number of k8s workers - (0)", type=int, default=0)
+parser.add_argument("--workers", help="Number of k8s workers - (2)", type=int, default=2)
 parser.add_argument("--managerimageflavor", help="Manager image flavor ID - (2004)", type=int, default=2004)
 parser.add_argument("--workerimageflavor", help="Worker image flavor ID - (2008)", type=int, default=2008)
 parser.add_argument("--glanceimagename", help="Glance image name ID - (Container Linux CoreOS (third-party))", default="Container Linux CoreOS (third-party)")
@@ -222,7 +222,7 @@ try:
         print("apidebuglevel:\t" + str(args.apidebuglevel))
         print("defaultsecgrp:\t" + str(args.defaultsecuritygroupid))
         print("-" * 40 + "\n")
-        print("To start building the cluster: \tterraform init && terraform plan && terraform apply && sh snat_acl.sh")
+        print("To start building the cluster: \tterraform init && terraform plan && terraform apply")
         print("To interact with the cluster: \tsh kubeconfig.sh")
 
         clusterstatusconfig_template = (clusterstatus_template.render(
