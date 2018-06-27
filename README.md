@@ -17,8 +17,8 @@ To get started with this nagoya script to deploy a high available kubernetes clu
 4. Run the nagoya script. When deploying your first cluster you don't have to use all the available flags. The script will prepare the terraform config file and the Ignition files for CoreOS Container Linux.
   * `./nagoya.py "YOURKEYPAIR_NAME" "FIRSTFLOATINGIP" "SECONDFLOATINGIP" --workers 3`
 5. Optional verify the result status information if it matches your desired cluster spec. If not to your liking run the command again with additional or altered flags.
-6. Instruct terraform to apply the config on OpenStack. You should add this as a onliner to make sure the snat permissions are properly set and the OS has connectivity to the internet and bootstrap properly.
-  * `terraform init && terraform plan && terraform apply && sh snat_acl.sh`
+6. Instruct terraform to apply the config on OpenStack.
+  * `terraform init && terraform plan && terraform apply`
 7. Load the generated kubernetes config
   * `sh kubeconfig.sh`
 8. You can run a watch command and see when the cluster will come online. This could take a couple of minutes.
@@ -42,6 +42,7 @@ usage: nagoya.py [-h] [--corepassword COREPASSWORD] [--username USERNAME]
                  [--alphafeatures ALPHAFEATURES]
                  [--availabilityzone AVAILABILITYZONE]
                  [--externalnetid EXTERNALNETID]
+                 [--defaultsecuritygroupid DEFAULTSECURITYGROUPID]
                  keypair floatingip1 floatingip2
 
 positional arguments:
@@ -91,6 +92,9 @@ optional arguments:
   --externalnetid EXTERNALNETID
                         External network id - (f9c73cd5-9e7b-4bfd-89eb-
                         c2f4f584c326)
+  --defaultsecuritygroupid DEFAULTSECURITYGROUPID
+                        Default Security group id- (c9537380-5f5c-497a-
+                        98c3-980b6ba6999e)
 ```
 
 #### Features
