@@ -65,7 +65,7 @@ optional arguments:
                         Private subnet CIDR - (192.168.3.0/24)
   --podcidr PODCIDR     Pod subnet CIDR - (10.244.0.0/16)
   --managers MANAGERS   Number of k8s managers - (3)
-  --workers WORKERS     Number of k8s workers - (0)
+  --workers WORKERS     Number of k8s workers - (2)
   --managerimageflavor MANAGERIMAGEFLAVOR
                         Manager image flavor ID - (2004)
   --workerimageflavor WORKERIMAGEFLAVOR
@@ -76,7 +76,7 @@ optional arguments:
                         DNS server - (8.8.8.8)
   --cloudprovider CLOUDPROVIDER
                         Cloud provider support - (openstack)
-  --k8sver K8SVER       Hyperkube version - (v1.9.6_coreos.0)
+  --k8sver K8SVER       Hyperkube version - (v1.10.3_coreos.0)
   --etcdver ETCDVER     ETCD version - (3.3.1)
   --flannelver FLANNELVER
                         Flannel image version - (0.10.0)
