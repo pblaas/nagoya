@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.9"
+__version__ = "0.3.10"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -61,6 +61,7 @@ parser.add_argument("--apidebuglevel", help="Api DebugLevel - (1)", type=int, de
 parser.add_argument("--alphafeatures", help="enable alpha feature - (false)", default="false")
 parser.add_argument("--availabilityzone", help="Availability zone - (AMS-EQ1)", default="AMS-EQ1")
 parser.add_argument("--externalnetid", help="External network id - (f9c73cd5-9e7b-4bfd-89eb-c2f4f584c326)", default="f9c73cd5-9e7b-4bfd-89eb-c2f4f584c326")
+parser.add_argument("--defaultsecuritygroupid", help="Default Security group id- (c9537380-5f5c-497a-98c3-980b6ba6999e)", default="c9537380-5f5c-497a-98c3-980b6ba6999e")
 args = parser.parse_args()
 
 template = TEMPLATE_ENVIRONMENT.get_template('k8s.tf.tmpl')
@@ -219,6 +220,7 @@ try:
         print("RBAC mode:\t" + str(args.rbac))
         print("alphafeatures:\t" + str(args.alphafeatures))
         print("apidebuglevel:\t" + str(args.apidebuglevel))
+        print("defaultsecgrp:\t" + str(args.defaultsecuritygroupid))
         print("-" * 40 + "\n")
         print("To start building the cluster: \tterraform init && terraform plan && terraform apply && sh snat_acl.sh")
         print("To interact with the cluster: \tsh kubeconfig.sh")
@@ -248,7 +250,8 @@ try:
             cryptedpass=cryptedPass,
             availabilityzone=args.availabilityzone,
             externalnetid=args.externalnetid,
-            apidebuglevel=args.apidebuglevel
+            apidebuglevel=args.apidebuglevel,
+            defaultsecuritygroupid=args.defaultsecuritygroupid
         ))
 
         with open('cluster.status', 'w') as k8sstat:
@@ -307,6 +310,7 @@ try:
         floatingip2=args.floatingip2,
         availabilityzone=args.availabilityzone,
         externalnetid=args.externalnetid,
+        defaultsecuritygroupid=args.defaultsecuritygroupid
     ))
 
     for node in range(10, args.managers + 10):

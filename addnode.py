@@ -116,6 +116,7 @@ try:
             sshkey = str(fh[18].split("\t")[2])[:-1]
             availabilityzone = str(fh[21].split("\t")[2])[:-1]
             apidebuglevel = str(fh[23].split("\t")[1])[:-1]
+            defaultsecuritygroupid = str(fh[24].split("\t")[1])[:-1]
 
             createNodeCert(lanip, "worker")
             worker_template = (cloudconf_template.render(
@@ -152,7 +153,8 @@ try:
                 keypair=keypair,
                 subnetcidr=subnetcidr,
                 octet=lanip.rsplit('.', 1)[1],
-                availabilityzone=availabilityzone
+                availabilityzone=availabilityzone,
+                defaultsecuritygroupid=defaultsecuritygroupid
             ))
 
             with open("k8s.tf", 'a') as k8stf:
