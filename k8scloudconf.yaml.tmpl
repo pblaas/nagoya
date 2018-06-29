@@ -186,6 +186,8 @@ systemd:
         ExecStartPre=/usr/bin/mkdir -p /var/log/containers
         ExecStartPre=/usr/bin/mkdir -p /tmp/k8stmp
         ExecStartPre=-/usr/bin/rkt rm --uuid-file=/var/run/kubelet-pod.uuid
+        ExecStartPre=/bin/mkdir -p /var/lib/kubelet/volumeplugins
+        ExecStartPre=/bin/mkdir -p /var/lib/rook
 {% if netoverlay == "calico" %}
         ExecStartPre=/usr/bin/mkdir -p /opt/cni/bin
         ExecStartPre=/usr/bin/mkdir -p /etc/cni/net.d
@@ -217,6 +219,7 @@ systemd:
         --anonymous-auth=false \
         --cloud-provider={{ cloudprovider }} \
         --cloud-config=/etc/kubernetes/cloud.conf \
+        --volume-plugin-dir=/var/lib/kubelet/volumeplugins \
         --http-check-frequency=20s \
         --node-status-update-frequency=30s \
         --volume-stats-agg-period=2m0s
