@@ -16,7 +16,7 @@ resource "openstack_compute_instance_v2" "k8s-{{ clustername }}-node{{ octet }}"
   image_name  = "{{ glanceimagename }}"
   flavor_id = "{{ workerimageflavor }}"
   key_pair  = "{{ keypair }}"
-  security_groups = ["${openstack_networking_secgroup_v2.secgroup_{{ clustername }}-1.name}"]
+  security_groups = ["${openstack_networking_secgroup_v2.secgroup_{{ clustername }}-1.name}", "default" ]
   user_data = "${file("node_{{ subnetcidr.rsplit('.', 1)[0] }}.{{ octet }}.json")}"
 
   scheduler_hints {
