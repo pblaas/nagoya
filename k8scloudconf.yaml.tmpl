@@ -500,6 +500,7 @@ storage:
 {% endif %}
               - --cluster-cidr=10.244.0.0/16
               - --conntrack-max-per-core=0
+              - --proxymode={{ proxymode }}
               - --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml
               - --v={{ apidebuglevel }}
               securityContext:
