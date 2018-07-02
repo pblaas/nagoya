@@ -222,6 +222,7 @@ try:
         print("alphafeatures:\t" + str(args.alphafeatures))
         print("apidebuglevel:\t" + str(args.apidebuglevel))
         print("defaultsecgrp:\t" + str(args.defaultsecuritygroupid))
+        print("proxymode:\t" +str(args.proxymode))
         print("-" * 40 + "\n")
         print("To start building the cluster: \tterraform init && terraform plan && terraform apply")
         print("To interact with the cluster: \tsh kubeconfig.sh")
