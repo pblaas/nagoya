@@ -85,6 +85,8 @@ optional arguments:
   --rbac RBAC           RBAC mode - (false)
   --apidebuglevel APIDEBUGLEVEL
                         Api DebugLevel - (1)
+  --proxymode PROXYMODE
+                        Proxymode - (iptables)
   --alphafeatures ALPHAFEATURES
                         enable alpha feature - (false)
   --availabilityzone AVAILABILITYZONE
@@ -108,6 +110,7 @@ optional arguments:
 * Loadbalancing k8s workers (up to first three) through OpenStack (LBAAS) for ingress.
 * Flannel network overlay support.
 * Calico network overlay support.
+* IPVS proxymode
 * Private network support.
 * All managers nodes are part of etcd3 cluster.
 
