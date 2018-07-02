@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.10"
+__version__ = "0.3.11"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -58,6 +58,7 @@ parser.add_argument("--flannelver", help="Flannel image version - (0.10.0)", def
 parser.add_argument("--netoverlay", help="Network overlay - (flannel)", default="flannel")
 parser.add_argument("--rbac", help="RBAC mode - (false)", default="false")
 parser.add_argument("--apidebuglevel", help="Api DebugLevel - (1)", type=int, default=1)
+parser.add_argument("--proxymode", help="Proxymode - (iptables)", default="iptables")
 parser.add_argument("--alphafeatures", help="enable alpha feature - (false)", default="false")
 parser.add_argument("--availabilityzone", help="Availability zone - (AMS-EQ1)", default="AMS-EQ1")
 parser.add_argument("--externalnetid", help="External network id - (f9c73cd5-9e7b-4bfd-89eb-c2f4f584c326)", default="f9c73cd5-9e7b-4bfd-89eb-c2f4f584c326")
@@ -251,7 +252,8 @@ try:
             availabilityzone=args.availabilityzone,
             externalnetid=args.externalnetid,
             apidebuglevel=args.apidebuglevel,
-            defaultsecuritygroupid=args.defaultsecuritygroupid
+            defaultsecuritygroupid=args.defaultsecuritygroupid,
+            proxymode=args.proxymode
         ))
 
         with open('cluster.status', 'w') as k8sstat:
@@ -342,6 +344,7 @@ try:
             ipaddress=lanip,
             ipaddressgw=(args.subnetcidr).rsplit('.', 1)[0] + ".1",
             alphafeatures=args.alphafeatures,
+            proxymode=args.proxymode
         ))
 
         with open(nodeyaml, 'w') as controller:
@@ -377,6 +380,7 @@ try:
             ipaddress=lanip,
             ipaddressgw=(args.subnetcidr).rsplit('.', 1)[0] + ".1",
             loadbalancer=(args.subnetcidr).rsplit('.', 1)[0] + ".3",
+            proxymode=args.proxymode
         ))
 
         with open(nodeyaml, 'w') as worker:

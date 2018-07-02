@@ -9,7 +9,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.0.7"
+__version__ = "0.0.8"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -117,6 +117,7 @@ try:
             availabilityzone = str(fh[21].split("\t")[2])[:-1]
             apidebuglevel = str(fh[23].split("\t")[1])[:-1]
             defaultsecuritygroupid = str(fh[24].split("\t")[1])[:-1]
+            proxymode = str(fh[25].split("\t")[1])[:-1]
 
             createNodeCert(lanip, "worker")
             worker_template = (cloudconf_template.render(
@@ -139,7 +140,8 @@ try:
                 loadbalancer=subnetcidr.rsplit('.', 1)[0] + ".3",
                 cryptedPass=cryptedPass,
                 sshkey=sshkey,
-                apidebuglevel=apidebuglevel
+                apidebuglevel=apidebuglevel,
+                proxymode=proxymode
             ))
 
             with open(nodeyaml, 'w') as worker:
