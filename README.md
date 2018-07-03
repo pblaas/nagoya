@@ -100,27 +100,26 @@ optional arguments:
 ```
 
 #### Features
-* HA manager K8S setup.
+* HA master K8S setup.
 * PKI on etcd cluster.
 * PKI on K8S nodes.
 * RBAC authorization mode support.
 * NodeRestriction admission control.
 * OpenStack provider for Storage through Cinder plugin.
-* Loadbalancing k8s managers through OpenStack (LBAAS).
+* OpenStack provider for automatic loadbalancer creation.
+* Loadbalancing k8s masters through OpenStack (LBAAS).
 * Loadbalancing k8s workers (up to first three) through OpenStack (LBAAS) for ingress.
 * Flannel network overlay support.
 * Calico network overlay support.
 * IPVS proxymode
 * Private network support.
-* All managers nodes are part of etcd3 cluster.
+* All master nodes are part of etcd3 cluster.
 
 #### Caveats
-If you are using this script without my managment container (pblaas/openstack-cli) make sure you set the following environment variables:
+If you are using this script without my management docker container (pblaas/openstack-cli) make sure you set the following environment variables:
 
 * export OS_TENANT_ID=$OS_PROJECT_ID
 * export OS_TENANT_NAME=$OS_PROJECT_NAME
 
 Make sure you have current version of the openstack CLI tool which is used during the deployment by the Python script.
-
-You're environment may use other defaults. Please let me know if you need to change anything to make this work on your end, not being on cloudvps.com so I can update the scripts and define this in provided params.
-
+Your environment may use other defaults if not using the OpenStack platform from CloudVPS.com.
