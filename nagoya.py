@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.11"
+__version__ = "0.3.12"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -87,6 +87,10 @@ try:
         subprocess.call(["openssl", "genrsa", "-out", "etcd-ca-key.pem", "2048"], cwd='./tls')
         subprocess.call(["openssl", "req", "-x509", "-new", "-nodes", "-key", "etcd-ca-key.pem", "-days", "10000", "-out", "etcd-ca.pem", "-subj", "/CN=etcd-k8s-ca"], cwd='./tls')
 
+        print("front-proxy-client CA")
+        subprocess.call(["openssl", "genrsa", "-out", "front-proxy-client-ca-key.pem", "2048"], cwd='./tls')
+        subprocess.call(["openssl", "req", "-x509", "-new", "-nodes", "-key", "front-proxy-client-ca-key.pem", "-days", "10000", "-out", "front-proxy-client-ca.pem", "-subj", "/CN=front-proxy-client-ca"], cwd='./tls')
+
     def createSAcert():
         """Create Service Account certificates."""
         print("ServiceAcccount cert")
@@ -100,7 +104,7 @@ try:
 
         print("Service account K8s")
         subprocess.call(["openssl", "genrsa", "-out", "sa-" + (args.clustername) + "-k8s-key.pem", "2048"], cwd='./tls')
-        subprocess.call(["openssl", "req", "-new", "-key", "sa-" + (args.clustername) + "-k8s-key.pem", "-out", "sa-" + (args.clustername) + "-k8s-key.csr", "-subj", "/CN=sa:k8s", "-config", "openssl.cnf"], cwd='./tls')
+        subprocess.call(["openssl", "req", "-new", "-key", "sa-" + (args.clustername) + "-k8s-key.pem", "-out", "front-proxy-client-" + (args.clustername) + "-k8s-key.csr", "-subj", "/CN=sa:k8s", "-config", "openssl.cnf"], cwd='./tls')
         subprocess.call(["openssl", "x509", "-req", "-in", "sa-" + (args.clustername) + "-k8s-key.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", "sa-" + (args.clustername) + "-k8s.pem", "-days", "365", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
     # Create node certificates
@@ -137,6 +141,19 @@ try:
         subprocess.call(["openssl", "genrsa", "-out", user + "-key.pem", "2048"], cwd='./tls')
         subprocess.call(["openssl", "req", "-new", "-key", user + "-key.pem", "-out", user + ".csr", "-subj", "/CN=" + user + "/O=system:masters", "-config", "openssl.cnf"], cwd='./tls')
         subprocess.call(["openssl", "x509", "-req", "-in", user + ".csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", user + ".pem", "-days", "365", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+
+    def createFrontProxyCert():
+        """Create FrontProxy-Client certificates."""
+        openssltemplate = (opensslworker_template.render(
+            ipaddress="127.0.0.1"
+        ))
+
+        with open('./tls/openssl.cnf', 'w') as openssl:
+            openssl.write(openssltemplate)
+
+        subprocess.call(["openssl", "genrsa", "-out", "front-proxy-client-key.pem", "2048"], cwd='./tls')
+        subprocess.call(["openssl", "req", "-new", "-key", "front-proxy-client-key.pem", "-out", "front-proxy-client.csr", "-subj", "/CN=front-proxy-client", "-config", "openssl.cnf"], cwd='./tls')
+        subprocess.call(["openssl", "x509", "-req", "-in", "front-proxy-client.csr", "-CA", "front-proxy-client-ca.pem", "-CAkey", "front-proxy-client-ca-key.pem", "-CAcreateserial", "-out", "front-proxy-client-cert.pem", "-days", "365", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
     def createCalicoObjects():
         """Create Calico cluster objects."""
@@ -276,6 +293,8 @@ try:
     createCaCert()
     # create ServiceAccount certificate
     createSAcert()
+    # create FrontProxy certificate for aggregation API
+    createFrontProxyCert()
     # Create core user passowrd
     generatePassword()
     returnPublicKey()

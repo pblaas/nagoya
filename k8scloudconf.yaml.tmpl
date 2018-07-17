@@ -481,6 +481,13 @@ storage:
               - --service-account-key-file=/etc/kubernetes/ssl/sa-{{ clustername }}-k8s.pem
               - --kubelet-client-certificate=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node.pem
               - --kubelet-client-key=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node-key.pem
+              - --requestheader-client-ca-file=/etc/kubernetes/ssl/front-proxy-client-ca.pem
+              - --proxy-client-cert-file=/etc/kubernetes/ssl/front-proxy-client-cert.pem
+              - --proxy-client-key-file=/etc/kubernetes/ssl/front-proxy-client-key.pem
+              - --requestheader-allowed-names=front-proxy-client
+              - --requestheader-extra-headers-prefix=X-Remote-Extra-
+              - --requestheader-group-headers=X-Remote-Group
+              - --requestheader-username-headers=X-Remote-User
               - --anonymous-auth=false
 {% if rbac == "true" %}
               - --authorization-mode=Node,RBAC
@@ -684,4 +691,19 @@ storage:
       mode: 0664
       contents:
         local: "sa-{{ clustername }}-k8s.pem"
+    - filesystem: "root"
+      path: "/etc/kubernetes/ssl/front-proxy-client-key.pem"
+      mode: 0664
+      contents:
+        local: "front-proxy-client-key.pem"
+    - filesystem: "root"
+      path: "/etc/kubernetes/ssl/front-proxy-client-cert.pem"
+      mode: 0664
+      contents:
+        local: "front-proxy-client-cert.pem"
+    - filesystem: "root"
+      path: "/etc/kubernetes/ssl/front-proxy-client-ca.pem"
+      mode: 0664
+      contents:
+        local: "front-proxy-client-ca.pem"
 {% endif %}
