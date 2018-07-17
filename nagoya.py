@@ -186,7 +186,7 @@ try:
 
     def configTranspiler(nodeip):
         """Create json file from yaml content."""
-        subprocess.call(["./ct", "-files-dir=tls", "-in-file", "node_" + nodeip + ".yaml", "-out-file", "node_" + nodeip + ".json", "-pretty"])
+        subprocess.call(["./ct", "-files-dir=tls", "-in-file", "node_" + nodeip + ".yaml", "-out-file", "node_" + nodeip + ".json"])
 
     def generatePassword():
         """Generate a random password."""
