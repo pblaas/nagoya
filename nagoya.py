@@ -153,7 +153,7 @@ try:
 
         subprocess.call(["openssl", "genrsa", "-out", "front-proxy-client-key.pem", "2048"], cwd='./tls')
         subprocess.call(["openssl", "req", "-new", "-key", "front-proxy-client-key.pem", "-out", "front-proxy-client.csr", "-subj", "/CN=front-proxy-client", "-config", "openssl.cnf"], cwd='./tls')
-        subprocess.call(["openssl", "x509", "-req", "-in", "front-proxy-client.csr", "-CA", "front-proxy-client-ca.pem", "-CAkey", "front-proxy-client-ca-key.pem", "-CAcreateserial", "-out", "front-proxy-client-cert.pem", "-days", "365", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+        subprocess.call(["openssl", "x509", "-req", "-in", "front-proxy-client.csr", "-CA", "front-proxy-client-ca.pem", "-CAkey", "front-proxy-client-ca-key.pem", "-CAcreateserial", "-out", "front-proxy-client.pem", "-days", "365", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
     def createCalicoObjects():
         """Create Calico cluster objects."""
