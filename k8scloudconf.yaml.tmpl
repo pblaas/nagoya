@@ -241,7 +241,7 @@ systemd:
         --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml \
 {% if isworker != 1 %}
         --node-labels=node-role.kubernetes.io/master=true \
-        --register-schedulable=false \
+        --register-with-taints=node-role.kubernetes.io/master=true:NoSchedule \
 {% else %}
         --register-node=true \
         --node-labels=node-role.kubernetes.io/worker=true \
@@ -254,7 +254,6 @@ systemd:
 {% endif %}
         --network-plugin=cni \
         --container-runtime=docker \
-        --allow-privileged=true \
         --pod-manifest-path=/etc/kubernetes/manifests \
         --hostname-override={{ ipaddress }} \
         --cluster_dns=10.3.0.10 \
