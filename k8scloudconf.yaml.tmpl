@@ -254,6 +254,7 @@ systemd:
 {% endif %}
         --network-plugin=cni \
         --container-runtime=docker \
+        --allow-privileged=true \
         --pod-manifest-path=/etc/kubernetes/manifests \
         --hostname-override={{ ipaddress }} \
         --cluster_dns=10.3.0.10 \
@@ -468,10 +469,10 @@ storage:
               - --secure-port=443
               - --advertise-address={{ ipaddress }}
 {% if alphafeatures == "true" %}
-              - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota,NodeRestriction,Initializers
+              - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,Priority,ResourceQuota,NodeRestriction,Initializers
               - --runtime-config=extensions/v1beta1/networkpolicies=true,admissionregistration.k8s.io/v1alpha1
 {% else %}
-              - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota,NodeRestriction
+              - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,Priority,ResourceQuota,NodeRestriction
               - --runtime-config=extensions/v1beta1/networkpolicies=true
 {% endif %}
               - --tls-cert-file=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node.pem
