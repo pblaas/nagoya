@@ -255,18 +255,11 @@ systemd:
         --network-plugin=cni \
         --container-runtime=docker \
         --allow-privileged=true \
-        --pod-manifest-path=/etc/kubernetes/manifests \
+        --config=/etc/kubernetes/kubelet.config \
         --hostname-override={{ ipaddress }} \
-        --cluster_dns=10.3.0.10 \
-        --cluster_domain=cluster.local \
-        --client-ca-file=/etc/kubernetes/ssl/ca.pem \
-        --anonymous-auth=false \
         --cloud-provider={{ cloudprovider }} \
         --cloud-config=/etc/kubernetes/cloud.conf \
-        --volume-plugin-dir=/var/lib/kubelet/volumeplugins \
-        --http-check-frequency=20s \
-        --node-status-update-frequency=30s \
-        --volume-stats-agg-period=2m0s
+        --volume-plugin-dir=/var/lib/kubelet/volumeplugins
         ExecStop=-/usr/bin/rkt stop --uuid-file=/var/run/kubelet-pod.uuid
         Restart=always
         RestartSec=10
