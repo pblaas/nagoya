@@ -537,16 +537,7 @@ storage:
               command:
               - /hyperkube
               - proxy
-{% if isworker == 1 %}
-              - --master=https://{{ loadbalancer }}
-{% else %}
-              - --master=http://127.0.0.1:8080
-{% endif %}
-              - --cluster-cidr=10.244.0.0/16
-              - --conntrack-max-per-core=0
-              - --proxy-mode={{ proxymode }}
-              - --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml
-              - --v={{ apidebuglevel }}
+              - --config=/etc/kubernetes/kubeproxy.config
               securityContext:
                 privileged: true
               volumeMounts:
@@ -555,6 +546,9 @@ storage:
                 readOnly: true
               - mountPath: /etc/kubernetes/master-kubeconfig.yaml
                 name: "kubeconfig"
+                readOnly: true
+              - mountPath: /etc/kubernetes/kubeproxy.config
+                name: "kubeproxy-config"
                 readOnly: true
               - mountPath: /etc/kubernetes/ssl
                 name: "etc-kube-ssl"
@@ -569,6 +563,9 @@ storage:
             - name: "etc-kube-ssl"
               hostPath:
                 path: "/etc/kubernetes/ssl"
+            - name: "kubeproxy-config"
+              hostPath:
+                path: "/etc/kubernetes/kubeproxy.config"
 {% if isworker != 1 %}
     - filesystem: "root"
       path: "/etc/kubernetes/manifests/kube-controller-manager.yaml"
