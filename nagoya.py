@@ -73,6 +73,9 @@ cloudconfig_template = TEMPLATE_ENVIRONMENT.get_template('cloud.conf.tmpl')
 clusterstatus_template = TEMPLATE_ENVIRONMENT.get_template('cluster.status.tmpl')
 opensslmanager_template = TEMPLATE_ENVIRONMENT.get_template('./tls/openssl.cnf.tmpl')
 opensslworker_template = TEMPLATE_ENVIRONMENT.get_template('./tls/openssl-worker.cnf.tmpl')
+kubeletconfig_template = TEMPLATE_ENVIRONMENT.get_template('kubelet.config.tmpl')
+kubeproxyconfig_template = TEMPLATE_ENVIRONMENT.get_template('kubeproxy.config.tmpl')
+
 
 try:
     # Create CA certificates
