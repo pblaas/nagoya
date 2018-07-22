@@ -65,42 +65,12 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Description=load ip_vs module
+        Description=load ip_vs modules
         [Service]
+        ExecStartPre=/sbin/modprobe ip_vs_rr
+        ExecStartPre=/sbin/modprobe ip_vs_wrr
+        ExecStartPre=/sbin/modprobe ip_vs_sh
         ExecStart=/sbin/modprobe ip_vs
-        RemainAfterExit=yes
-        Type=oneshot
-        [Install]
-        WantedBy=multi-user.target
-    - name: ip_vs_rr.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=load ip_vs_rr module
-        [Service]
-        ExecStart=/sbin/modprobe ip_vs_rr
-        RemainAfterExit=yes
-        Type=oneshot
-        [Install]
-        WantedBy=multi-user.target
-    - name: ip_vs_wrr.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=load ip_vs_wrr module
-        [Service]
-        ExecStart=/sbin/modprobe ip_vs_wrr
-        RemainAfterExit=yes
-        Type=oneshot
-        [Install]
-        WantedBy=multi-user.target
-    - name: ip_vs_sh.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=load ip_vs_sh module
-        [Service]
-        ExecStart=/sbin/modprobe ip_vs_sh
         RemainAfterExit=yes
         Type=oneshot
         [Install]
