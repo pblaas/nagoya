@@ -395,12 +395,12 @@ storage:
       path: "/etc/kubernetes/kubelet.config"
       mode: 0664
       contents:
-        local: "kubelet.config"
+        local: "../kubelet.config"
     - filesystem: "root"
       path: "/etc/kubernetes/kubeproxy.config"
       mode: 0664
       contents:
-        local: "kubeproxy.config"
+        local: "../kubeproxy.config"
     - filesystem: "root"
       path: "/etc/kubernetes/master-kubeconfig.yaml"
       mode: 0644
