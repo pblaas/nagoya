@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.12"
+__version__ = "0.3.13"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -318,6 +318,20 @@ try:
 
     with open('cloud.conf', 'w') as cloudconf:
         cloudconf.write(cloudconfig_template)
+
+    kubeletconfig_template = (kubeletconfig_template.render(
+    ))
+
+    with open('kubelet.config', 'w') as kubeletconf:
+        kubeletconf.write(kubeletconfig_template)
+
+    kubeproxyconfig_template = (kubeproxyconfig_template.render(
+        proxymode=args.proxymode,
+        podcidr=args.podcidr
+    ))
+
+    with open('kubeproxy.config', 'w') as kubeproxyconf:
+        kubeproxyconf.write(kubeproxyconfig_template)
 
     k8stemplate = (template.render(
         username=args.username,
