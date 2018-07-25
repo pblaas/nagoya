@@ -29,4 +29,11 @@ spec:
         imagePullPolicy: Always
         command:
         - /metrics-server
-        - --source=kubernetes.summary_api:''
+        - --source=kubernetes.summary_api:https://kubernetes.default.svc?inClusterConfig=false&kubeletHttps=true&kubeletPort=10250&auth=/etc/kubernetes/ssl/kubeconfig&insecure=true
+        volumeMounts:
+        - name: kubeconfig
+          mountPath: /etc/kubernetes/ssl/
+      volumes:
+        - name: kubeconfig
+          configMap:
+            name: metricsconfig
