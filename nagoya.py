@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.14"
+__version__ = "0.3.15"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -65,16 +65,16 @@ parser.add_argument("--externalnetid", help="External network id - (f9c73cd5-9e7
 parser.add_argument("--defaultsecuritygroupid", help="Default Security group id- (c9537380-5f5c-497a-98c3-980b6ba6999e)", default="c9537380-5f5c-497a-98c3-980b6ba6999e")
 args = parser.parse_args()
 
-template = TEMPLATE_ENVIRONMENT.get_template('k8s.tf.tmpl')
-calico_template = TEMPLATE_ENVIRONMENT.get_template('calico.yaml.tmpl')
-cloudconf_template = TEMPLATE_ENVIRONMENT.get_template('k8scloudconf.yaml.tmpl')
-kubeconfig_template = TEMPLATE_ENVIRONMENT.get_template('kubeconfig.sh.tmpl')
-cloudconfig_template = TEMPLATE_ENVIRONMENT.get_template('cloud.conf.tmpl')
-clusterstatus_template = TEMPLATE_ENVIRONMENT.get_template('cluster.status.tmpl')
+template = TEMPLATE_ENVIRONMENT.get_template('./templates/k8s.tf.tmpl')
+calico_template = TEMPLATE_ENVIRONMENT.get_template('./template/calico.yaml.tmpl')
+cloudconf_template = TEMPLATE_ENVIRONMENT.get_template('./templates/k8scloudconf.yaml.tmpl')
+kubeconfig_template = TEMPLATE_ENVIRONMENT.get_template('./templates/kubeconfig.sh.tmpl')
+cloudconfig_template = TEMPLATE_ENVIRONMENT.get_template('./templates/cloud.conf.tmpl')
+clusterstatus_template = TEMPLATE_ENVIRONMENT.get_template('./templates/cluster.status.tmpl')
 opensslmanager_template = TEMPLATE_ENVIRONMENT.get_template('./tls/openssl.cnf.tmpl')
 opensslworker_template = TEMPLATE_ENVIRONMENT.get_template('./tls/openssl-worker.cnf.tmpl')
-kubeletconfig_template = TEMPLATE_ENVIRONMENT.get_template('kubelet.config.tmpl')
-kubeproxyconfig_template = TEMPLATE_ENVIRONMENT.get_template('kubeproxy.config.tmpl')
+kubeletconfig_template = TEMPLATE_ENVIRONMENT.get_template('./templates/kubelet.config.tmpl')
+kubeproxyconfig_template = TEMPLATE_ENVIRONMENT.get_template('./templates/kubeproxy.config.tmpl')
 
 
 try:

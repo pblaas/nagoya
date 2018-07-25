@@ -9,7 +9,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.0.8"
+__version__ = "0.0.9"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -41,9 +41,9 @@ parser.add_argument("--projectname", help="Openstack project Name - (OS_TENANT_N
 parser.add_argument("--k8sver", help="Hyperkube version")
 args = parser.parse_args()
 
-cloudconf_template = TEMPLATE_ENVIRONMENT.get_template('k8scloudconf.yaml.tmpl')
+cloudconf_template = TEMPLATE_ENVIRONMENT.get_template('./templates/k8scloudconf.yaml.tmpl')
 opensslmanager_template = TEMPLATE_ENVIRONMENT.get_template('./tls/openssl.cnf.tmpl')
-additional_node_template = TEMPLATE_ENVIRONMENT.get_template('additional_node.tf.tmpl')
+additional_node_template = TEMPLATE_ENVIRONMENT.get_template('./templates/additional_node.tf.tmpl')
 opensslworker_template = TEMPLATE_ENVIRONMENT.get_template('./tls/openssl-worker.cnf.tmpl')
 
 try:
