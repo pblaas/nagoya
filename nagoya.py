@@ -62,7 +62,6 @@ parser.add_argument("--proxymode", help="Proxymode - (iptables)", default="iptab
 parser.add_argument("--alphafeatures", help="enable alpha feature - (false)", default="false")
 parser.add_argument("--availabilityzone", help="Availability zone - (AMS-EQ1)", default="AMS-EQ1")
 parser.add_argument("--externalnetid", help="External network id - (f9c73cd5-9e7b-4bfd-89eb-c2f4f584c326)", default="f9c73cd5-9e7b-4bfd-89eb-c2f4f584c326")
-parser.add_argument("--defaultsecuritygroupid", help="Default Security group id- (c9537380-5f5c-497a-98c3-980b6ba6999e)", default="c9537380-5f5c-497a-98c3-980b6ba6999e")
 args = parser.parse_args()
 
 template = TEMPLATE_ENVIRONMENT.get_template('./templates/k8s.tf.tmpl')
@@ -218,6 +217,12 @@ try:
         rsakey = subprocess.check_output(["openstack", "keypair", "show", "--public-key", args.keypair]).strip()
         return rsakey
 
+    def returnDefaultSecurityGroupId():
+        """Retrieve default security group id from OpenStack."""
+        global defaultsecgroupid
+        defaultsecgroupid = subprocess.Popen("openstack security group list -f value -c ID -c Name | grep default", shell=True, stdout=subprocess.PIPE)
+        return defaultsecgroupid.stdout.read().split(" ")[0]
+
     def printClusterInfo():
         """Print cluster info."""
         print("-" * 40 + "\n\nCluster Info:")
@@ -241,7 +246,7 @@ try:
         print("RBAC mode:\t" + str(args.rbac))
         print("alphafeatures:\t" + str(args.alphafeatures))
         print("apidebuglevel:\t" + str(args.apidebuglevel))
-        print("defaultsecgrp:\t" + str(args.defaultsecuritygroupid))
+        print("defaultsecgrp:\t" + str(defaultsecuritygroupid))
         print("proxymode:\t" + str(args.proxymode))
         print("-" * 40 + "\n")
         print("To start building the cluster: \tterraform init && terraform plan && terraform apply")
@@ -273,7 +278,7 @@ try:
             availabilityzone=args.availabilityzone,
             externalnetid=args.externalnetid,
             apidebuglevel=args.apidebuglevel,
-            defaultsecuritygroupid=args.defaultsecuritygroupid,
+            defaultsecuritygroupid=defaultsecuritygroupid,
             proxymode=args.proxymode
         ))
 
@@ -301,6 +306,7 @@ try:
     # Create core user passowrd
     generatePassword()
     returnPublicKey()
+    returnDefaultSecurityGroupId()
     etcdtoken = generateRandomString()
 
     # Required for Calico yaml
@@ -349,7 +355,7 @@ try:
         floatingip2=args.floatingip2,
         availabilityzone=args.availabilityzone,
         externalnetid=args.externalnetid,
-        defaultsecuritygroupid=args.defaultsecuritygroupid
+        defaultsecuritygroupid=defaultsecuritygroupid
     ))
 
     for node in range(10, args.managers + 10):

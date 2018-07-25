@@ -42,7 +42,6 @@ usage: nagoya.py [-h] [--corepassword COREPASSWORD] [--username USERNAME]
                  [--alphafeatures ALPHAFEATURES]
                  [--availabilityzone AVAILABILITYZONE]
                  [--externalnetid EXTERNALNETID]
-                 [--defaultsecuritygroupid DEFAULTSECURITYGROUPID]
                  keypair floatingip1 floatingip2
 
 positional arguments:
@@ -94,9 +93,6 @@ optional arguments:
   --externalnetid EXTERNALNETID
                         External network id - (f9c73cd5-9e7b-4bfd-89eb-
                         c2f4f584c326)
-  --defaultsecuritygroupid DEFAULTSECURITYGROUPID
-                        Default Security group id- (c9537380-5f5c-497a-
-                        98c3-980b6ba6999e)
 ```
 
 #### Features
