@@ -219,9 +219,9 @@ try:
 
     def returnDefaultSecurityGroupId():
         """Retrieve default security group id from OpenStack."""
-        global defaultsecgroupid
-        defaultsecgroupid = subprocess.Popen("openstack security group list -f value -c ID -c Name | grep default", shell=True, stdout=subprocess.PIPE)
-        return defaultsecgroupid.stdout.read().split(" ")[0]
+        global defaultsecuritygroupid
+        defaultsecuritygroupid = subprocess.Popen("openstack security group list -f value -c ID -c Name | grep default", shell=True, stdout=subprocess.PIPE)
+        return defaultsecuritygroupid.stdout.read().split(" ")[0]
 
     def printClusterInfo():
         """Print cluster info."""
