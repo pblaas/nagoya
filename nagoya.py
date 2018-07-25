@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.15"
+__version__ = "0.3.16"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -66,7 +66,7 @@ parser.add_argument("--defaultsecuritygroupid", help="Default Security group id-
 args = parser.parse_args()
 
 template = TEMPLATE_ENVIRONMENT.get_template('./templates/k8s.tf.tmpl')
-calico_template = TEMPLATE_ENVIRONMENT.get_template('./template/calico.yaml.tmpl')
+calico_template = TEMPLATE_ENVIRONMENT.get_template('./templates/calico.yaml.tmpl')
 cloudconf_template = TEMPLATE_ENVIRONMENT.get_template('./templates/k8scloudconf.yaml.tmpl')
 kubeconfig_template = TEMPLATE_ENVIRONMENT.get_template('./templates/kubeconfig.sh.tmpl')
 cloudconfig_template = TEMPLATE_ENVIRONMENT.get_template('./templates/cloud.conf.tmpl')
