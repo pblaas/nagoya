@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.16"
+__version__ = "0.3.17"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
