@@ -76,8 +76,8 @@ optional arguments:
                         DNS server - (8.8.8.8)
   --cloudprovider CLOUDPROVIDER
                         Cloud provider support - (openstack)
-  --k8sver K8SVER       Hyperkube version - (v1.10.3_coreos.0)
-  --etcdver ETCDVER     ETCD version - (3.3.1)
+  --k8sver K8SVER       Hyperkube version - (v1.10.5_coreos.0)
+  --etcdver ETCDVER     ETCD version - (3.3.9)
   --flannelver FLANNELVER
                         Flannel image version - (0.10.0)
   --netoverlay NETOVERLAY

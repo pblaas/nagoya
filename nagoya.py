@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.13"
+__version__ = "0.3.14"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -52,8 +52,8 @@ parser.add_argument("--workerimageflavor", help="Worker image flavor ID - (2008)
 parser.add_argument("--glanceimagename", help="Glance image name ID - (Container Linux CoreOS (third-party))", default="Container Linux CoreOS (third-party)")
 parser.add_argument("--dnsserver", help="DNS server - (8.8.8.8)", default="8.8.8.8")
 parser.add_argument("--cloudprovider", help="Cloud provider support - (openstack)", default="openstack")
-parser.add_argument("--k8sver", help="Hyperkube version - (v1.10.3_coreos.0)", default="v1.10.3_coreos.0")
-parser.add_argument("--etcdver", help="ETCD version - (3.3.1)", default="3.3.1")
+parser.add_argument("--k8sver", help="Hyperkube version - (v1.10.5_coreos.0)", default="v1.10.5_coreos.0")
+parser.add_argument("--etcdver", help="ETCD version - (3.3.9)", default="3.3.9")
 parser.add_argument("--flannelver", help="Flannel image version - (0.10.0)", default="0.10.0")
 parser.add_argument("--netoverlay", help="Network overlay - (flannel)", default="flannel")
 parser.add_argument("--rbac", help="RBAC mode - (false)", default="false")
