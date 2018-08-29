@@ -227,8 +227,7 @@ systemd:
         --allow-privileged=true \
         --config=/etc/kubernetes/kubelet.config \
         --hostname-override={{ ipaddress }} \
-        --cloud-provider={{ cloudprovider }} \
-        --cloud-config=/etc/kubernetes/cloud.conf \
+        --cloud-provider=external \
         --volume-plugin-dir=/var/lib/kubelet/volumeplugins
         ExecStop=-/usr/bin/rkt stop --uuid-file=/var/run/kubelet-pod.uuid
         Restart=always
@@ -443,7 +442,7 @@ storage:
               - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,Priority,ResourceQuota,NodeRestriction,Initializers
               - --runtime-config=extensions/v1beta1/networkpolicies=true,admissionregistration.k8s.io/v1alpha1
 {% else %}
-              - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,Priority,ResourceQuota,NodeRestriction
+              - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,Priority,ResourceQuota,NodeRestriction,Initializers
               - --runtime-config=extensions/v1beta1/networkpolicies=true
 {% endif %}
               - --tls-cert-file=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node.pem
@@ -466,8 +465,6 @@ storage:
               - --authorization-mode=AlwaysAllow
 {% endif %}
               - --v={{ apidebuglevel }}
-              - --cloud-provider={{ cloudprovider }}
-              - --cloud-config=/etc/kubernetes/ssl/cloud.conf
               livenessProbe:
                 httpGet:
                   host: 127.0.0.1
@@ -567,8 +564,6 @@ storage:
               - --leader-elect=true
               - --service-account-private-key-file=/etc/kubernetes/ssl/sa-{{ clustername }}-k8s-key.pem
               - --root-ca-file=/etc/kubernetes/ssl/ca.pem
-              - --cloud-provider={{ cloudprovider }}
-              - --cloud-config=/etc/kubernetes/ssl/cloud.conf
               - --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml
               - --v={{ apidebuglevel }}
               - --node-monitor-grace-period=120s
