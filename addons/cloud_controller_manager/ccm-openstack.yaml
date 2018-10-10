@@ -39,7 +39,7 @@ spec:
       - name: cloud-controller-manager
         # for in-tree providers we use k8s.gcr.io/cloud-controller-manager
         # this can be replaced with any other image for out-of-tree providers
-        image: k8s.gcr.io/cloud-controller-manager:v1.8.0
+        image: k8s.gcr.io/cloud-controller-manager:v1.12.1
         command:
         - /usr/local/bin/cloud-controller-manager
         - --cloud-provider=openstack  # Add your own cloud provider here!
@@ -61,14 +61,14 @@ spec:
           name: cloudconfig
       volumes:                                      
       - name: ca_pem                                  
-          hostPath:
-            path: /etc/kubernetes/ssl/ca.pem
+        hostPath:
+          path: /etc/kubernetes/ssl/ca.pem
       - name: kubeconfig
-          hostPath:
-            path: /etc/kubernetes/master-kubeconfig.yaml
+        hostPath:
+          path: /etc/kubernetes/master-kubeconfig.yaml
       - name: cloudconfig
-          hostPath:
-            path: /etc/kubernetes/cloud.conf
+        hostPath:
+          path: /etc/kubernetes/cloud.conf
       tolerations:
       # this is required so CCM can bootstrap itself
       - key: node.cloudprovider.kubernetes.io/uninitialized
