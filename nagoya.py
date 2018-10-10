@@ -364,6 +364,7 @@ try:
         createNodeCert(lanip, "manager")
 
         manager_template = (cloudconf_template.render(
+            node=node,
             cryptedPass=cryptedPass,
             sshkey=rsakey,
             apidebuglevel=args.apidebuglevel,
@@ -399,6 +400,7 @@ try:
         createNodeCert(lanip, "worker")
 
         worker_template = (cloudconf_template.render(
+            node=node,
             isworker=1,
             managers=args.managers,
             workers=args.workers,

@@ -228,7 +228,6 @@ systemd:
         --container-runtime=docker \
         --allow-privileged=true \
         --config=/etc/kubernetes/kubelet.config \
-        --hostname-override={{ ipaddress }} \
         --cloud-provider=external \
         --volume-plugin-dir=/var/lib/kubelet/volumeplugins
         ExecStop=-/usr/bin/rkt stop --uuid-file=/var/run/kubelet-pod.uuid
@@ -252,7 +251,7 @@ storage:
       path:       "/etc/hostname"
       mode:       0644
       contents:
-        inline: {{ ipaddress }}
+        inline: k8s-{{clustername}}-node{{ node }}
     - filesystem: "root"
       path: "/etc/resolv.conf"
       mode: 0644
