@@ -212,11 +212,11 @@ systemd:
         ExecStart=/usr/lib/coreos/kubelet-wrapper \
         --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml \
 {% if isworker != 1 %}
-        --node-labels=node-role.kubernetes.io/master=true \
+        --node-labels=node-role.kubernetes.io/master="" \
         --register-with-taints=node-role.kubernetes.io/master=true:NoSchedule \
 {% else %}
         --register-node=true \
-        --node-labels=node-role.kubernetes.io/worker=true \
+        --node-labels=node-role.kubernetes.io/worker="" \
 {% endif %}
 {% if netoverlay == "calico" %}
         --cni-conf-dir=/etc/cni/net.d \
