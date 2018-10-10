@@ -442,10 +442,10 @@ storage:
               - --secure-port=443
               - --advertise-address={{ ipaddress }}
 {% if alphafeatures == "true" %}
-              - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,Priority,ResourceQuota,NodeRestriction,Initializers
+              - --enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,Priority,ResourceQuota,NodeRestriction,Initializers
               - --runtime-config=extensions/v1beta1/networkpolicies=true,admissionregistration.k8s.io/v1alpha1
 {% else %}
-              - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,Priority,ResourceQuota,NodeRestriction
+              - --enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,Priority,ResourceQuota,NodeRestriction
               - --runtime-config=extensions/v1beta1/networkpolicies=true
 {% endif %}
               - --tls-cert-file=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node.pem
