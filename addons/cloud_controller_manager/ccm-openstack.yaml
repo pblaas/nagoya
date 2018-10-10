@@ -39,7 +39,7 @@ spec:
       - name: cloud-controller-manager
         # for in-tree providers we use k8s.gcr.io/cloud-controller-manager
         # this can be replaced with any other image for out-of-tree providers
-        image: k8s.gcr.io/cloud-controller-manager:v1.12.1
+        image:  k8scloudprovider/openstack-cloud-controller-manager:latest
         command:
         - /usr/local/bin/cloud-controller-manager
         - --cloud-provider=openstack  # Add your own cloud provider here!
