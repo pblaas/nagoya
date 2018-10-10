@@ -54,13 +54,13 @@ spec:
         # these flags will vary for every cloud provider
         volumeMounts:
         - mountPath: /etc/kubernetes/ssl/ca.pem
-          name: ca_pem
+          name: ca-pem
         - mountPath: /etc/kubernetes/master-kubeconfig.yaml
           name: kubeconfig
         - mountPath: /etc/kubernetes/cloud.conf
           name: cloudconfig
       volumes:                                      
-      - name: ca_pem                                  
+      - name: ca-pem                                  
         hostPath:
           path: /etc/kubernetes/ssl/ca.pem
       - name: kubeconfig
