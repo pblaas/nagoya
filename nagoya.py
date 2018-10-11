@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.17"
+__version__ = "0.3.18"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -69,6 +69,7 @@ calico_template = TEMPLATE_ENVIRONMENT.get_template('./templates/calico.yaml.tmp
 cloudconf_template = TEMPLATE_ENVIRONMENT.get_template('./templates/k8scloudconf.yaml.tmpl')
 kubeconfig_template = TEMPLATE_ENVIRONMENT.get_template('./templates/kubeconfig.sh.tmpl')
 cloudconfig_template = TEMPLATE_ENVIRONMENT.get_template('./templates/cloud.conf.tmpl')
+cloud_conf_template = TEMPLATE_ENVIRONMENT.get_template('./templates/cloud-conf.tmpl')
 clusterstatus_template = TEMPLATE_ENVIRONMENT.get_template('./templates/cluster.status.tmpl')
 opensslmanager_template = TEMPLATE_ENVIRONMENT.get_template('./tls/openssl.cnf.tmpl')
 opensslworker_template = TEMPLATE_ENVIRONMENT.get_template('./tls/openssl-worker.cnf.tmpl')
@@ -324,6 +325,18 @@ try:
 
     with open('cloud.conf', 'w') as cloudconf:
         cloudconf.write(cloudconfig_template)
+
+    cloud_conf_template = (cloud_conf_template.render(
+        authurl=os.environ["OS_AUTH_URL"],
+        username=args.username,
+        password=os.environ["OS_PASSWORD"],
+        region=os.environ["OS_REGION_NAME"],
+        projectname=args.projectname,
+        tenantid=os.environ["OS_TENANT_ID"],
+    ))
+
+    with open('./addons/cloud_controller_manager/cloud.conf', 'w') as cloudconf:
+        cloudconf.write(cloud_conf_template)
 
     kubeletconfig_template = (kubeletconfig_template.render(
     ))
