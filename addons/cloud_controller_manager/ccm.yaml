@@ -32,6 +32,7 @@ spec:
         value: "true"
         effect: NoSchedule
       - key: node-role.kubernetes.io/master
+        value: "true"
         effect: NoSchedule
       serviceAccountName: cloud-controller-manager
       containers:
@@ -43,11 +44,8 @@ spec:
             - --cloud-config=/etc/cloud/cloud-config
             - --cloud-provider=openstack
             - --leader-elect=true
-            - --root-ca-file=/etc/kubernetes/ssl/ca.pem
             - --use-service-account-credentials=true
-            - --address=127.0.0.1
             - --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml
-            - --node-monitor-grace-period=120s
             - --node-monitor-period=10s
           volumeMounts:
             - mountPath: /etc/kubernetes/ssl
@@ -70,7 +68,7 @@ spec:
       hostNetwork: true
       volumes:
       - hostPath:
-          path: /usr/libexec/kubernetes/kubelet-plugins/volume/exec
+          path: /var/lib/kubelet-plugins/volume/exec
           type: DirectoryOrCreate
         name: flexvolume-dir
       - hostPath:
