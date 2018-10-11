@@ -26,7 +26,7 @@ spec:
       nodeSelector:
         node-role.kubernetes.io/master: ""
       securityContext:
-        runAsUser: 1001
+        runAsUser: 0
       tolerations:
       - key: node.cloudprovider.kubernetes.io/uninitialized
         value: "true"
@@ -40,7 +40,7 @@ spec:
           image: docker.io/k8scloudprovider/openstack-cloud-controller-manager:latest
           args:
             - /bin/openstack-cloud-controller-manager
-            - --v=2
+            - --v=10
             - --cloud-config=/etc/cloud/cloud-config
             - --cloud-provider=openstack
             - --leader-elect=true
@@ -76,7 +76,7 @@ spec:
           type: DirectoryOrCreate
         name: k8s-certs
       - hostPath:
-          path: /etc/ssl/certs
+          path: /usr/share/ca-certificates
           type: DirectoryOrCreate
         name: ca-certs
       - hostPath:
