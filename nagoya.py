@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.18"
+__version__ = "0.3.19"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -335,7 +335,7 @@ try:
         tenantid=os.environ["OS_TENANT_ID"],
     ))
 
-    with open('./addons/cloud_controller_manager/cloud.conf', 'w') as cloudconf:
+    with open('./addons/cloud-controller-manager/cloud.conf', 'w') as cloudconf:
         cloudconf.write(cloud_conf_template)
 
     kubeletconfig_template = (kubeletconfig_template.render(
