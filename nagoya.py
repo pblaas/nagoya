@@ -218,12 +218,6 @@ try:
         rsakey = subprocess.check_output(["openstack", "keypair", "show", "--public-key", args.keypair]).strip()
         return rsakey
 
-    def returnSubnetId():
-        """Retrieve subnetID from OpenStack."""
-        global subnetid
-        subnetid = subprocess.Popen("openstack subnet list -f value | grep " + args.clustername, shell=True, stdout=subprocess.PIPE).stdout.read().split(" ")[0]
-        return subnetid
-
     def returnDefaultSecurityGroupId():
         """Retrieve default security group id from OpenStack."""
         global defaultsecuritygroupid
@@ -240,7 +234,6 @@ try:
         print("Flannel vers:\t" + str(args.flannelver))
         print("Clustername:\t" + str(args.clustername))
         print("Cluster cidr:\t" + str(args.subnetcidr))
-        print("SubnetID\t" + str(subnetid))
         print("Pod Cidr:\t" + str(args.podcidr))
         print("Managers:\t" + str(args.managers))
         print("Workers:\t" + str(args.workers))
@@ -315,7 +308,6 @@ try:
     generatePassword()
     returnPublicKey()
     returnDefaultSecurityGroupId()
-    returnSubnetId()
     etcdtoken = generateRandomString()
 
     # Required for Calico yaml
