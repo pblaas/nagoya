@@ -315,6 +315,7 @@ try:
     generatePassword()
     returnPublicKey()
     returnDefaultSecurityGroupId()
+    returnSubnetId()
     etcdtoken = generateRandomString()
 
     # Required for Calico yaml
