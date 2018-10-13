@@ -240,7 +240,7 @@ try:
         print("Flannel vers:\t" + str(args.flannelver))
         print("Clustername:\t" + str(args.clustername))
         print("Cluster cidr:\t" + str(args.subnetcidr))
-        pirnt("SubnetID\t" + str(subnetid))
+        print("SubnetID\t" + str(subnetid))
         print("Pod Cidr:\t" + str(args.podcidr))
         print("Managers:\t" + str(args.managers))
         print("Workers:\t" + str(args.workers))
