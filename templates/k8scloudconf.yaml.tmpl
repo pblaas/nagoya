@@ -567,6 +567,7 @@ storage:
               - --root-ca-file=/etc/kubernetes/ssl/ca.pem
               - --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml
               - --v={{ apidebuglevel }}
+              - --cloud-provider=external
               - --node-monitor-grace-period=120s
               - --node-monitor-period=10s
               resources:
