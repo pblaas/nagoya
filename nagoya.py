@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.19"
+__version__ = "0.3.20"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -218,6 +218,12 @@ try:
         rsakey = subprocess.check_output(["openstack", "keypair", "show", "--public-key", args.keypair]).strip()
         return rsakey
 
+    def returnSubnetId():
+        """Retrieve subnetID from OpenStack."""
+        global subnetid
+        subnetid = subprocess.Popen("openstack subnet list -f value | grep " + args.clustername, shell=True, stdout=subprocess.PIPE).stdout.read().split(" ")[0]
+        return subnetid
+
     def returnDefaultSecurityGroupId():
         """Retrieve default security group id from OpenStack."""
         global defaultsecuritygroupid
@@ -234,6 +240,7 @@ try:
         print("Flannel vers:\t" + str(args.flannelver))
         print("Clustername:\t" + str(args.clustername))
         print("Cluster cidr:\t" + str(args.subnetcidr))
+        pirnt("SubnetID\t" + str(subnetid))
         print("Pod Cidr:\t" + str(args.podcidr))
         print("Managers:\t" + str(args.managers))
         print("Workers:\t" + str(args.workers))
