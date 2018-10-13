@@ -228,7 +228,13 @@ systemd:
         --container-runtime=docker \
         --allow-privileged=true \
         --config=/etc/kubernetes/kubelet.config \
+{% if cloudprovider == "external" %}
         --cloud-provider=external \
+{% endif %}
+{% if cloudprovider == "openstack" %}
+        --cloud-provider=openstack \
+        --cloud-config=/etc/kubernetes/cloud.conf \
+{% endif %}
         --volume-plugin-dir=/var/lib/kubelet/volumeplugins
         ExecStop=-/usr/bin/rkt stop --uuid-file=/var/run/kubelet-pod.uuid
         Restart=always
@@ -460,6 +466,10 @@ storage:
               - --requestheader-group-headers=X-Remote-Group
               - --requestheader-username-headers=X-Remote-User
               - --anonymous-auth=false
+{% if cloudprovider == "openstack" %}
+              - --cloud-provider=openstack
+              - --cloud-config=/etc/kubernetes/cloud.conf
+{% endif %}
 {% if rbac == "true" %}
               - --authorization-mode=Node,RBAC
 {% else %}
@@ -570,6 +580,13 @@ storage:
               - --cloud-provider=external
               - --node-monitor-grace-period=120s
               - --node-monitor-period=10s
+{% if cloudprovider == "external" %}
+              - --cloud-provider=external
+{% endif %}
+{% if cloudprovider == "openstack" %}
+              - --cloud-provider=openstack
+              - --cloud-config=/etc/kubernetes/cloud.conf
+{% endif %}
               resources:
                 requests:
                   cpu: 200m
