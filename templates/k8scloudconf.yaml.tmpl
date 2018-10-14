@@ -216,7 +216,7 @@ systemd:
         --register-with-taints=node-role.kubernetes.io/master=true:NoSchedule \
 {% else %}
         --register-node=true \
-        --node-labels=node-role.kubernetes.io/worker="" \
+        --node-labels=node-role.kubernetes.io/worker="true" \
 {% endif %}
 {% if netoverlay == "calico" %}
         --cni-conf-dir=/etc/cni/net.d \
