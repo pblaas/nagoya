@@ -43,6 +43,15 @@ def ValidateDNS(v):
     except:
         raise argparse.ArgumentTypeError("String '%s' does not match required format" % (v,))
 
+
+def ValidateCIDR(v):
+    import re  # Unless you've already imported re previously
+    try:
+        return re.match("^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$", v).group(0)
+    except:
+        raise argparse.ArgumentTypeError("String '%s' does not match required format" % (v,))
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument("keypair", help="Keypair ID")
 parser.add_argument("floatingip1", help="Floatingip 1 for API calls")
@@ -50,7 +59,7 @@ parser.add_argument("floatingip2", help="Floatingip 2 for public access to clust
 parser.add_argument("--username", help="Openstack username - (OS_USERNAME environment variable)", default=os.environ["OS_USERNAME"])
 parser.add_argument("--projectname", help="Openstack project Name - (OS_TENANT_NAME environment variable)", default=os.environ["OS_TENANT_NAME"])
 parser.add_argument("--clustername", help="Clustername - (k8scluster)", type=ValidateDNS, default="k8scluster")
-parser.add_argument("--subnetcidr", help="Private subnet CIDR - (192.168.3.0/24)", default="192.168.3.0/24")
+parser.add_argument("--subnetcidr", help="Private subnet CIDR - (192.168.3.0/24)", type=ValidateCIDR, default="192.168.3.0/24")
 parser.add_argument("--podcidr", help="Pod subnet CIDR - (10.244.0.0/16)", default="10.244.0.0/16")
 parser.add_argument("--managers", help="Number of k8s managers - (3)", type=int, default=3)
 parser.add_argument("--workers", help="Number of k8s workers - (2)", type=int, default=2)
