@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.23"
+__version__ = "0.3.24"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -47,7 +47,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument("keypair", help="Keypair ID")
 parser.add_argument("floatingip1", help="Floatingip 1 for API calls")
 parser.add_argument("floatingip2", help="Floatingip 2 for public access to cluster")
-parser.add_argument("--corepassword", help="Password to authenticate with core user")
 parser.add_argument("--username", help="Openstack username - (OS_USERNAME environment variable)", default=os.environ["OS_USERNAME"])
 parser.add_argument("--projectname", help="Openstack project Name - (OS_TENANT_NAME environment variable)", default=os.environ["OS_TENANT_NAME"])
 parser.add_argument("--clustername", help="Clustername - (k8scluster)", type=ValidateDNS, default="k8scluster")
@@ -65,7 +64,7 @@ parser.add_argument("--etcdver", help="ETCD version - (3.3.9)", default="3.3.9")
 parser.add_argument("--flannelver", help="Flannel image version - (0.10.0)", default="0.10.0")
 parser.add_argument("--netoverlay", help="Network overlay - (flannel)", choices=['flannel', 'calico'], default="flannel")
 parser.add_argument("--rbac", help="RBAC mode - (false)", choices=['true', 'false'], default="false")
-parser.add_argument("--apidebuglevel", help="Api DebugLevel - (1)", type=int, choices=range(1, 10), default=1)
+parser.add_argument("--apidebuglevel", help="Api DebugLevel - (1)", type=int, choices=range(1, 11), default=1)
 parser.add_argument("--proxymode", help="Proxymode - (iptables)", choices=['ipvs', 'iptables'], default="iptables")
 parser.add_argument("--alphafeatures", help="enable alpha feature - (false)", choices=['true', 'false'], default="false")
 parser.add_argument("--availabilityzone", help="Availability zone - (AMS-EQ1)", default="AMS-EQ1")
