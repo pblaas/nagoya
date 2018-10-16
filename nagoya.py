@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.21"
+__version__ = "0.3.22"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -35,6 +35,14 @@ if "OS_REGION_NAME" not in os.environ:
 if "OS_AUTH_URL" not in os.environ:
     os.environ["OS_AUTH_URL"] = "Default"
 
+
+def ValidateDNS(v):
+    import re  # Unless you've already imported re previously
+    try:
+        return re.match("^1:m:(a-z0-9?(.a-z0-9?)*)$", v).group(0)
+    except:
+        raise argparse.ArgumentTypeError("String '%s' does not match required format" % (v,))
+
 parser = argparse.ArgumentParser()
 parser.add_argument("keypair", help="Keypair ID")
 parser.add_argument("floatingip1", help="Floatingip 1 for API calls")
@@ -42,7 +50,7 @@ parser.add_argument("floatingip2", help="Floatingip 2 for public access to clust
 parser.add_argument("--corepassword", help="Password to authenticate with core user")
 parser.add_argument("--username", help="Openstack username - (OS_USERNAME environment variable)", default=os.environ["OS_USERNAME"])
 parser.add_argument("--projectname", help="Openstack project Name - (OS_TENANT_NAME environment variable)", default=os.environ["OS_TENANT_NAME"])
-parser.add_argument("--clustername", help="Clustername - (k8scluster)", default="k8scluster")
+parser.add_argument("--clustername", help="Clustername - (k8scluster)", type=ValidateDNS, default="k8scluster")
 parser.add_argument("--subnetcidr", help="Private subnet CIDR - (192.168.3.0/24)", default="192.168.3.0/24")
 parser.add_argument("--podcidr", help="Pod subnet CIDR - (10.244.0.0/16)", default="10.244.0.0/16")
 parser.add_argument("--managers", help="Number of k8s managers - (3)", type=int, default=3)
@@ -51,15 +59,15 @@ parser.add_argument("--managerimageflavor", help="Manager image flavor ID - (200
 parser.add_argument("--workerimageflavor", help="Worker image flavor ID - (2008)", type=int, default=2008)
 parser.add_argument("--glanceimagename", help="Glance image name ID - (Container Linux CoreOS (third-party))", default="Container Linux CoreOS (third-party)")
 parser.add_argument("--dnsserver", help="DNS server - (8.8.8.8)", default="8.8.8.8")
-parser.add_argument("--cloudprovider", help="Cloud provider support - (openstack)", default="openstack")
+parser.add_argument("--cloudprovider", help="Cloud provider support - (openstack)", choices=['openstack', 'external'], default="openstack")
 parser.add_argument("--k8sver", help="Hyperkube version - (v1.12.1)", default="v1.12.1")
 parser.add_argument("--etcdver", help="ETCD version - (3.3.9)", default="3.3.9")
 parser.add_argument("--flannelver", help="Flannel image version - (0.10.0)", default="0.10.0")
-parser.add_argument("--netoverlay", help="Network overlay - (flannel)", default="flannel")
-parser.add_argument("--rbac", help="RBAC mode - (false)", default="false")
-parser.add_argument("--apidebuglevel", help="Api DebugLevel - (1)", type=int, default=1)
-parser.add_argument("--proxymode", help="Proxymode - (iptables)", default="iptables")
-parser.add_argument("--alphafeatures", help="enable alpha feature - (false)", default="false")
+parser.add_argument("--netoverlay", help="Network overlay - (flannel)", choices=['flannel', 'calico'], default="flannel")
+parser.add_argument("--rbac", help="RBAC mode - (false)", choices=['true', 'false'], default="false")
+parser.add_argument("--apidebuglevel", help="Api DebugLevel - (1)", type=int, choices=range(1, 10), default=1)
+parser.add_argument("--proxymode", help="Proxymode - (iptables)", choices=['ipvs', 'iptables'], default="iptables")
+parser.add_argument("--alphafeatures", help="enable alpha feature - (false)", choices=['true', 'false'], default="false")
 parser.add_argument("--availabilityzone", help="Availability zone - (AMS-EQ1)", default="AMS-EQ1")
 parser.add_argument("--externalnetid", help="External network id - (f9c73cd5-9e7b-4bfd-89eb-c2f4f584c326)", default="f9c73cd5-9e7b-4bfd-89eb-c2f4f584c326")
 args = parser.parse_args()
