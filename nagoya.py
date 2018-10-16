@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.22"
+__version__ = "0.3.23"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -39,7 +39,7 @@ if "OS_AUTH_URL" not in os.environ:
 def ValidateDNS(v):
     import re  # Unless you've already imported re previously
     try:
-        return re.match("^1:m:(a-z0-9?(.a-z0-9?)*)$", v).group(0)
+        return re.match("^[a-z0-9]*$", v).group(0)
     except:
         raise argparse.ArgumentTypeError("String '%s' does not match required format" % (v,))
 
