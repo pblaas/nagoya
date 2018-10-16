@@ -468,7 +468,7 @@ storage:
               - --anonymous-auth=false
 {% if cloudprovider == "openstack" %}
               - --cloud-provider=openstack
-              - --cloud-config=/etc/kubernetes/cloud.conf
+              - --cloud-config=/etc/kubernetes/ssl/cloud.conf
 {% endif %}
 {% if rbac == "true" %}
               - --authorization-mode=Node,RBAC
@@ -584,7 +584,7 @@ storage:
 {% endif %}
 {% if cloudprovider == "openstack" %}
               - --cloud-provider=openstack
-              - --cloud-config=/etc/kubernetes/cloud.conf
+              - --cloud-config=/etc/kubernetes/ssl/cloud.conf
 {% endif %}
               resources:
                 requests:
