@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.24"
+__version__ = "0.3.25"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -115,7 +115,7 @@ try:
         print("Service account K8s")
         subprocess.call(["openssl", "genrsa", "-out", "sa-" + (args.clustername) + "-k8s-key.pem", "2048"], cwd='./tls')
         subprocess.call(["openssl", "req", "-new", "-key", "sa-" + (args.clustername) + "-k8s-key.pem", "-out", "sa-" + (args.clustername) + "-k8s-key.csr", "-subj", "/CN=sa:k8s", "-config", "openssl.cnf"], cwd='./tls')
-        subprocess.call(["openssl", "x509", "-req", "-in", "sa-" + (args.clustername) + "-k8s-key.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", "sa-" + (args.clustername) + "-k8s.pem", "-days", "365", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+        subprocess.call(["openssl", "x509", "-req", "-in", "sa-" + (args.clustername) + "-k8s-key.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", "sa-" + (args.clustername) + "-k8s.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
     # Create node certificates
     def createNodeCert(nodeip, k8srole):
@@ -138,19 +138,19 @@ try:
         nodeoctet = nodeip.rsplit('.')[3]
         subprocess.call(["openssl", "genrsa", "-out", nodeip + "-k8s-node-key.pem", "2048"], cwd='./tls')
         subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-k8s-node-key.pem", "-out", nodeip + "-k8s-node.csr", "-subj", "/CN=system:node:k8s-" + str(args.clustername) + "-node" + str(nodeoctet) + "/O=system:nodes", "-config", "openssl.cnf"], cwd='./tls')
-        subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-node.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-node.pem", "-days", "365", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+        subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-node.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-node.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
         # ${i}-etcd-worker.pem
         subprocess.call(["openssl", "genrsa", "-out", nodeip + "-etcd-node-key.pem", "2048"], cwd='./tls')
         subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-etcd-node-key.pem", "-out", nodeip + "-etcd-node.csr", "-subj", "/CN=" + nodeip + "-etcd-node", "-config", "openssl.cnf"], cwd='./tls')
-        subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-etcd-node.csr", "-CA", "etcd-ca.pem", "-CAkey", "etcd-ca-key.pem", "-CAcreateserial", "-out", nodeip + "-etcd-node.pem", "-days", "365", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+        subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-etcd-node.csr", "-CA", "etcd-ca.pem", "-CAkey", "etcd-ca-key.pem", "-CAcreateserial", "-out", nodeip + "-etcd-node.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
     def createClientCert(user):
         """Create Client certificates."""
         print("client: " + user)
         subprocess.call(["openssl", "genrsa", "-out", user + "-key.pem", "2048"], cwd='./tls')
         subprocess.call(["openssl", "req", "-new", "-key", user + "-key.pem", "-out", user + ".csr", "-subj", "/CN=" + user + "/O=system:masters", "-config", "openssl.cnf"], cwd='./tls')
-        subprocess.call(["openssl", "x509", "-req", "-in", user + ".csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", user + ".pem", "-days", "365", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+        subprocess.call(["openssl", "x509", "-req", "-in", user + ".csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", user + ".pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
     def createFrontProxyCert():
         """Create FrontProxy-Client certificates."""
@@ -163,7 +163,7 @@ try:
 
         subprocess.call(["openssl", "genrsa", "-out", "front-proxy-client-key.pem", "2048"], cwd='./tls')
         subprocess.call(["openssl", "req", "-new", "-key", "front-proxy-client-key.pem", "-out", "front-proxy-client.csr", "-subj", "/CN=front-proxy-client", "-config", "openssl.cnf"], cwd='./tls')
-        subprocess.call(["openssl", "x509", "-req", "-in", "front-proxy-client.csr", "-CA", "front-proxy-client-ca.pem", "-CAkey", "front-proxy-client-ca-key.pem", "-CAcreateserial", "-out", "front-proxy-client.pem", "-days", "365", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+        subprocess.call(["openssl", "x509", "-req", "-in", "front-proxy-client.csr", "-CA", "front-proxy-client-ca.pem", "-CAkey", "front-proxy-client-ca-key.pem", "-CAcreateserial", "-out", "front-proxy-client.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
     def createCalicoObjects():
         """Create Calico cluster objects."""
@@ -177,7 +177,7 @@ try:
         print("Service account calico")
         subprocess.call(["openssl", "genrsa", "-out", "sa-" + (args.clustername) + "-calico-key.pem", "2048"], cwd='./tls')
         subprocess.call(["openssl", "req", "-new", "-key", "sa-" + (args.clustername) + "-calico-key.pem", "-out", "sa-" + (args.clustername) + "-calico-key.csr", "-subj", "/CN=sa:calico", "-config", "openssl.cnf"], cwd='./tls')
-        subprocess.call(["openssl", "x509", "-req", "-in", "sa-" + (args.clustername) + "-calico-key.csr", "-CA", "etcd-ca.pem", "-CAkey", "etcd-ca-key.pem", "-CAcreateserial", "-out", "sa-" + (args.clustername) + "-calico.pem", "-days", "365", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+        subprocess.call(["openssl", "x509", "-req", "-in", "sa-" + (args.clustername) + "-calico-key.csr", "-CA", "etcd-ca.pem", "-CAkey", "etcd-ca-key.pem", "-CAcreateserial", "-out", "sa-" + (args.clustername) + "-calico.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
         buffer_calicosa = open("./tls/sa-" + str(args.clustername) + "-calico.pem", "rU").read()
         etcdsacalicobase64 = base64.b64encode(buffer_calicosa)
