@@ -51,8 +51,6 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  --corepassword COREPASSWORD
-                        Password to authenticate with core user
   --username USERNAME   Openstack username - (OS_USERNAME environment
                         variable)
   --projectname PROJECTNAME
