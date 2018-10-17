@@ -28,18 +28,17 @@ You should now have a fully functional kubernetes cluster which is fully complia
 
 ### Available usage flags:
 ```
-usage: nagoya.py [-h] [--corepassword COREPASSWORD] [--username USERNAME]
-                 [--projectname PROJECTNAME] [--clustername CLUSTERNAME]
-                 [--subnetcidr SUBNETCIDR] [--podcidr PODCIDR]
-                 [--managers MANAGERS] [--workers WORKERS]
+usage: nagoya.py [-h] [--username USERNAME] [--projectname PROJECTNAME]
+                 [--clustername CLUSTERNAME] [--subnetcidr SUBNETCIDR]
+                 [--podcidr PODCIDR] [--managers MANAGERS] [--workers WORKERS]
                  [--managerimageflavor MANAGERIMAGEFLAVOR]
                  [--workerimageflavor WORKERIMAGEFLAVOR]
                  [--glanceimagename GLANCEIMAGENAME] [--dnsserver DNSSERVER]
-                 [--cloudprovider CLOUDPROVIDER] [--k8sver K8SVER]
+                 [--cloudprovider {openstack,external}] [--k8sver K8SVER]
                  [--etcdver ETCDVER] [--flannelver FLANNELVER]
-                 [--netoverlay NETOVERLAY] [--rbac RBAC]
-                 [--apidebuglevel APIDEBUGLEVEL] [--proxymode PROXYMODE]
-                 [--alphafeatures ALPHAFEATURES]
+                 [--netoverlay {flannel,calico}] [--rbac {true,false}]
+                 [--apidebuglevel {1,2,3,4,5,6,7,8,9,10}]
+                 [--proxymode {ipvs,iptables}] [--alphafeatures {true,false}]
                  [--availabilityzone AVAILABILITYZONE]
                  [--externalnetid EXTERNALNETID]
                  keypair floatingip1 floatingip2
@@ -51,8 +50,6 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  --corepassword COREPASSWORD
-                        Password to authenticate with core user
   --username USERNAME   Openstack username - (OS_USERNAME environment
                         variable)
   --projectname PROJECTNAME
@@ -70,23 +67,24 @@ optional arguments:
   --workerimageflavor WORKERIMAGEFLAVOR
                         Worker image flavor ID - (2008)
   --glanceimagename GLANCEIMAGENAME
-                        Glance image name ID - (Container Linux CoreOS (third-party))
+                        Glance image name ID - (Container Linux CoreOS (third-
+                        party))
   --dnsserver DNSSERVER
                         DNS server - (8.8.8.8)
-  --cloudprovider CLOUDPROVIDER
+  --cloudprovider {openstack,external}
                         Cloud provider support - (openstack)
   --k8sver K8SVER       Hyperkube version - (v1.12.1)
   --etcdver ETCDVER     ETCD version - (3.3.9)
   --flannelver FLANNELVER
                         Flannel image version - (0.10.0)
-  --netoverlay NETOVERLAY
+  --netoverlay {flannel,calico}
                         Network overlay - (flannel)
-  --rbac RBAC           RBAC mode - (false)
-  --apidebuglevel APIDEBUGLEVEL
+  --rbac {true,false}   RBAC mode - (false)
+  --apidebuglevel {1,2,3,4,5,6,7,8,9,10}
                         Api DebugLevel - (1)
-  --proxymode PROXYMODE
+  --proxymode {ipvs,iptables}
                         Proxymode - (iptables)
-  --alphafeatures ALPHAFEATURES
+  --alphafeatures {true,false}
                         enable alpha feature - (false)
   --availabilityzone AVAILABILITYZONE
                         Availability zone - (AMS-EQ1)

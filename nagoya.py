@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.18"
+__version__ = "0.3.25"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -35,6 +35,23 @@ if "OS_REGION_NAME" not in os.environ:
 if "OS_AUTH_URL" not in os.environ:
     os.environ["OS_AUTH_URL"] = "Default"
 
+
+def ValidateDNS(v):
+    import re  # Unless you've already imported re previously
+    try:
+        return re.match("^[a-z0-9]*$", v).group(0)
+    except:
+        raise argparse.ArgumentTypeError("String '%s' does not match required format" % (v,))
+
+
+def ValidateCIDR(v):
+    import re  # Unless you've already imported re previously
+    try:
+        return re.match("^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$", v).group(0)
+    except:
+        raise argparse.ArgumentTypeError("String '%s' does not match required format" % (v,))
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument("keypair", help="Keypair ID")
 parser.add_argument("floatingip1", help="Floatingip 1 for API calls")
@@ -42,8 +59,8 @@ parser.add_argument("floatingip2", help="Floatingip 2 for public access to clust
 parser.add_argument("--corepassword", help="Password to authenticate with core user")
 parser.add_argument("--username", help="Openstack username - (OS_USERNAME environment variable)", default=os.environ["OS_USERNAME"])
 parser.add_argument("--projectname", help="Openstack project Name - (OS_TENANT_NAME environment variable)", default=os.environ["OS_TENANT_NAME"])
-parser.add_argument("--clustername", help="Clustername - (k8scluster)", default="k8scluster")
-parser.add_argument("--subnetcidr", help="Private subnet CIDR - (192.168.3.0/24)", default="192.168.3.0/24")
+parser.add_argument("--clustername", help="Clustername - (k8scluster)", type=ValidateDNS, default="k8scluster")
+parser.add_argument("--subnetcidr", help="Private subnet CIDR - (192.168.3.0/24)", type=ValidateCIDR, default="192.168.3.0/24")
 parser.add_argument("--podcidr", help="Pod subnet CIDR - (10.244.0.0/16)", default="10.244.0.0/16")
 parser.add_argument("--managers", help="Number of k8s managers - (3)", type=int, default=3)
 parser.add_argument("--workers", help="Number of k8s workers - (2)", type=int, default=2)
@@ -51,15 +68,15 @@ parser.add_argument("--managerimageflavor", help="Manager image flavor ID - (200
 parser.add_argument("--workerimageflavor", help="Worker image flavor ID - (2008)", type=int, default=2008)
 parser.add_argument("--glanceimagename", help="Glance image name ID - (Container Linux CoreOS (third-party))", default="Container Linux CoreOS (third-party)")
 parser.add_argument("--dnsserver", help="DNS server - (8.8.8.8)", default="8.8.8.8")
-parser.add_argument("--cloudprovider", help="Cloud provider support - (openstack)", default="openstack")
+parser.add_argument("--cloudprovider", help="Cloud provider support - (openstack)", choices=['openstack', 'external'], default="openstack")
 parser.add_argument("--k8sver", help="Hyperkube version - (v1.12.1)", default="v1.12.1")
 parser.add_argument("--etcdver", help="ETCD version - (3.3.9)", default="3.3.9")
 parser.add_argument("--flannelver", help="Flannel image version - (0.10.0)", default="0.10.0")
-parser.add_argument("--netoverlay", help="Network overlay - (flannel)", default="flannel")
-parser.add_argument("--rbac", help="RBAC mode - (false)", default="false")
-parser.add_argument("--apidebuglevel", help="Api DebugLevel - (1)", type=int, default=1)
-parser.add_argument("--proxymode", help="Proxymode - (iptables)", default="iptables")
-parser.add_argument("--alphafeatures", help="enable alpha feature - (false)", default="false")
+parser.add_argument("--netoverlay", help="Network overlay - (flannel)", choices=['flannel', 'calico'], default="flannel")
+parser.add_argument("--rbac", help="RBAC mode - (false)", choices=['true', 'false'], default="false")
+parser.add_argument("--apidebuglevel", help="Api DebugLevel - (1)", type=int, choices=range(1, 11), default=1)
+parser.add_argument("--proxymode", help="Proxymode - (iptables)", choices=['ipvs', 'iptables'], default="iptables")
+parser.add_argument("--alphafeatures", help="enable alpha feature - (false)", choices=['true', 'false'], default="false")
 parser.add_argument("--availabilityzone", help="Availability zone - (AMS-EQ1)", default="AMS-EQ1")
 parser.add_argument("--externalnetid", help="External network id - (f9c73cd5-9e7b-4bfd-89eb-c2f4f584c326)", default="f9c73cd5-9e7b-4bfd-89eb-c2f4f584c326")
 args = parser.parse_args()
@@ -69,6 +86,7 @@ calico_template = TEMPLATE_ENVIRONMENT.get_template('./templates/calico.yaml.tmp
 cloudconf_template = TEMPLATE_ENVIRONMENT.get_template('./templates/k8scloudconf.yaml.tmpl')
 kubeconfig_template = TEMPLATE_ENVIRONMENT.get_template('./templates/kubeconfig.sh.tmpl')
 cloudconfig_template = TEMPLATE_ENVIRONMENT.get_template('./templates/cloud.conf.tmpl')
+cloud_conf_template = TEMPLATE_ENVIRONMENT.get_template('./templates/cloud-conf.tmpl')
 clusterstatus_template = TEMPLATE_ENVIRONMENT.get_template('./templates/cluster.status.tmpl')
 opensslmanager_template = TEMPLATE_ENVIRONMENT.get_template('./tls/openssl.cnf.tmpl')
 opensslworker_template = TEMPLATE_ENVIRONMENT.get_template('./tls/openssl-worker.cnf.tmpl')
@@ -107,7 +125,7 @@ try:
         print("Service account K8s")
         subprocess.call(["openssl", "genrsa", "-out", "sa-" + (args.clustername) + "-k8s-key.pem", "2048"], cwd='./tls')
         subprocess.call(["openssl", "req", "-new", "-key", "sa-" + (args.clustername) + "-k8s-key.pem", "-out", "sa-" + (args.clustername) + "-k8s-key.csr", "-subj", "/CN=sa:k8s", "-config", "openssl.cnf"], cwd='./tls')
-        subprocess.call(["openssl", "x509", "-req", "-in", "sa-" + (args.clustername) + "-k8s-key.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", "sa-" + (args.clustername) + "-k8s.pem", "-days", "365", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+        subprocess.call(["openssl", "x509", "-req", "-in", "sa-" + (args.clustername) + "-k8s-key.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", "sa-" + (args.clustername) + "-k8s.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
     # Create node certificates
     def createNodeCert(nodeip, k8srole):
@@ -130,19 +148,19 @@ try:
         nodeoctet = nodeip.rsplit('.')[3]
         subprocess.call(["openssl", "genrsa", "-out", nodeip + "-k8s-node-key.pem", "2048"], cwd='./tls')
         subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-k8s-node-key.pem", "-out", nodeip + "-k8s-node.csr", "-subj", "/CN=system:node:k8s-" + str(args.clustername) + "-node" + str(nodeoctet) + "/O=system:nodes", "-config", "openssl.cnf"], cwd='./tls')
-        subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-node.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-node.pem", "-days", "365", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+        subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-node.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-node.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
         # ${i}-etcd-worker.pem
         subprocess.call(["openssl", "genrsa", "-out", nodeip + "-etcd-node-key.pem", "2048"], cwd='./tls')
         subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-etcd-node-key.pem", "-out", nodeip + "-etcd-node.csr", "-subj", "/CN=" + nodeip + "-etcd-node", "-config", "openssl.cnf"], cwd='./tls')
-        subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-etcd-node.csr", "-CA", "etcd-ca.pem", "-CAkey", "etcd-ca-key.pem", "-CAcreateserial", "-out", nodeip + "-etcd-node.pem", "-days", "365", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+        subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-etcd-node.csr", "-CA", "etcd-ca.pem", "-CAkey", "etcd-ca-key.pem", "-CAcreateserial", "-out", nodeip + "-etcd-node.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
     def createClientCert(user):
         """Create Client certificates."""
         print("client: " + user)
         subprocess.call(["openssl", "genrsa", "-out", user + "-key.pem", "2048"], cwd='./tls')
         subprocess.call(["openssl", "req", "-new", "-key", user + "-key.pem", "-out", user + ".csr", "-subj", "/CN=" + user + "/O=system:masters", "-config", "openssl.cnf"], cwd='./tls')
-        subprocess.call(["openssl", "x509", "-req", "-in", user + ".csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", user + ".pem", "-days", "365", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+        subprocess.call(["openssl", "x509", "-req", "-in", user + ".csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", user + ".pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
     def createFrontProxyCert():
         """Create FrontProxy-Client certificates."""
@@ -155,7 +173,7 @@ try:
 
         subprocess.call(["openssl", "genrsa", "-out", "front-proxy-client-key.pem", "2048"], cwd='./tls')
         subprocess.call(["openssl", "req", "-new", "-key", "front-proxy-client-key.pem", "-out", "front-proxy-client.csr", "-subj", "/CN=front-proxy-client", "-config", "openssl.cnf"], cwd='./tls')
-        subprocess.call(["openssl", "x509", "-req", "-in", "front-proxy-client.csr", "-CA", "front-proxy-client-ca.pem", "-CAkey", "front-proxy-client-ca-key.pem", "-CAcreateserial", "-out", "front-proxy-client.pem", "-days", "365", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+        subprocess.call(["openssl", "x509", "-req", "-in", "front-proxy-client.csr", "-CA", "front-proxy-client-ca.pem", "-CAkey", "front-proxy-client-ca-key.pem", "-CAcreateserial", "-out", "front-proxy-client.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
     def createCalicoObjects():
         """Create Calico cluster objects."""
@@ -169,7 +187,7 @@ try:
         print("Service account calico")
         subprocess.call(["openssl", "genrsa", "-out", "sa-" + (args.clustername) + "-calico-key.pem", "2048"], cwd='./tls')
         subprocess.call(["openssl", "req", "-new", "-key", "sa-" + (args.clustername) + "-calico-key.pem", "-out", "sa-" + (args.clustername) + "-calico-key.csr", "-subj", "/CN=sa:calico", "-config", "openssl.cnf"], cwd='./tls')
-        subprocess.call(["openssl", "x509", "-req", "-in", "sa-" + (args.clustername) + "-calico-key.csr", "-CA", "etcd-ca.pem", "-CAkey", "etcd-ca-key.pem", "-CAcreateserial", "-out", "sa-" + (args.clustername) + "-calico.pem", "-days", "365", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+        subprocess.call(["openssl", "x509", "-req", "-in", "sa-" + (args.clustername) + "-calico-key.csr", "-CA", "etcd-ca.pem", "-CAkey", "etcd-ca-key.pem", "-CAcreateserial", "-out", "sa-" + (args.clustername) + "-calico.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
         buffer_calicosa = open("./tls/sa-" + str(args.clustername) + "-calico.pem", "rU").read()
         etcdsacalicobase64 = base64.b64encode(buffer_calicosa)
@@ -325,6 +343,18 @@ try:
     with open('cloud.conf', 'w') as cloudconf:
         cloudconf.write(cloudconfig_template)
 
+    cloud_conf_template = (cloud_conf_template.render(
+        authurl=os.environ["OS_AUTH_URL"],
+        username=args.username,
+        password=os.environ["OS_PASSWORD"],
+        region=os.environ["OS_REGION_NAME"],
+        projectname=args.projectname,
+        tenantid=os.environ["OS_TENANT_ID"],
+    ))
+
+    with open('./addons/cloud-controller-manager/cloud.conf', 'w') as cloudconf:
+        cloudconf.write(cloud_conf_template)
+
     kubeletconfig_template = (kubeletconfig_template.render(
     ))
 
@@ -364,6 +394,7 @@ try:
         createNodeCert(lanip, "manager")
 
         manager_template = (cloudconf_template.render(
+            node=node,
             cryptedPass=cryptedPass,
             sshkey=rsakey,
             apidebuglevel=args.apidebuglevel,
@@ -399,6 +430,7 @@ try:
         createNodeCert(lanip, "worker")
 
         worker_template = (cloudconf_template.render(
+            node=node,
             isworker=1,
             managers=args.managers,
             workers=args.workers,

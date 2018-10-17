@@ -228,9 +228,13 @@ systemd:
         --container-runtime=docker \
         --allow-privileged=true \
         --config=/etc/kubernetes/kubelet.config \
-        --hostname-override={{ ipaddress }} \
-        --cloud-provider={{ cloudprovider }} \
+{% if cloudprovider == "external" %}
+        --cloud-provider=external \
+{% endif %}
+{% if cloudprovider == "openstack" %}
+        --cloud-provider=openstack \
         --cloud-config=/etc/kubernetes/cloud.conf \
+{% endif %}
         --volume-plugin-dir=/var/lib/kubelet/volumeplugins
         ExecStop=-/usr/bin/rkt stop --uuid-file=/var/run/kubelet-pod.uuid
         Restart=always
@@ -253,7 +257,7 @@ storage:
       path:       "/etc/hostname"
       mode:       0644
       contents:
-        inline: {{ ipaddress }}
+        inline: k8s-{{clustername}}-node{{ node }}
     - filesystem: "root"
       path: "/etc/resolv.conf"
       mode: 0644
@@ -442,11 +446,11 @@ storage:
               - --secure-port=443
               - --advertise-address={{ ipaddress }}
 {% if alphafeatures == "true" %}
-              - --enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,Priority,ResourceQuota,NodeRestriction,Initializers
+              - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,Priority,ResourceQuota,NodeRestriction,Initializers
               - --runtime-config=extensions/v1beta1/networkpolicies=true,admissionregistration.k8s.io/v1alpha1
 {% else %}
-              - --enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,Priority,ResourceQuota,NodeRestriction
-              - --runtime-config=extensions/v1beta1/networkpolicies=true
+              - --enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,Priority,ResourceQuota,NodeRestriction,Initializers
+              - --runtime-config=extensions/v1beta1/networkpolicies=true,admissionregistration.k8s.io/v1alpha1
 {% endif %}
               - --tls-cert-file=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node.pem
               - --tls-private-key-file=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node-key.pem
@@ -462,14 +466,16 @@ storage:
               - --requestheader-group-headers=X-Remote-Group
               - --requestheader-username-headers=X-Remote-User
               - --anonymous-auth=false
+{% if cloudprovider == "openstack" %}
+              - --cloud-provider=openstack
+              - --cloud-config=/etc/kubernetes/ssl/cloud.conf
+{% endif %}
 {% if rbac == "true" %}
               - --authorization-mode=Node,RBAC
 {% else %}
               - --authorization-mode=AlwaysAllow
 {% endif %}
               - --v={{ apidebuglevel }}
-              - --cloud-provider={{ cloudprovider }}
-              - --cloud-config=/etc/kubernetes/ssl/cloud.conf
               livenessProbe:
                 httpGet:
                   host: 127.0.0.1
@@ -569,12 +575,17 @@ storage:
               - --leader-elect=true
               - --service-account-private-key-file=/etc/kubernetes/ssl/sa-{{ clustername }}-k8s-key.pem
               - --root-ca-file=/etc/kubernetes/ssl/ca.pem
-              - --cloud-provider={{ cloudprovider }}
-              - --cloud-config=/etc/kubernetes/ssl/cloud.conf
               - --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml
               - --v={{ apidebuglevel }}
               - --node-monitor-grace-period=120s
               - --node-monitor-period=10s
+{% if cloudprovider == "external" %}
+              - --cloud-provider=external
+{% endif %}
+{% if cloudprovider == "openstack" %}
+              - --cloud-provider=openstack
+              - --cloud-config=/etc/kubernetes/ssl/cloud.conf
+{% endif %}
               resources:
                 requests:
                   cpu: 200m
