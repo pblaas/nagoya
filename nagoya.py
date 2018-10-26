@@ -200,7 +200,7 @@ try:
             etcdsacalicokeybase64=etcdsacalicokeybase64
         ))
 
-        with open('calico.yaml', 'w') as calico:
+        with open('./addons/calico/calico.yaml', 'w') as calico:
             calico.write(calicoconfig_template)
 
     def configTranspiler(nodeip):
