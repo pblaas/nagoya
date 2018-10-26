@@ -29,6 +29,8 @@ rules:
   verbs:
   - list
   - watch
+  - create
+  - update
 - apiGroups:
   - ""
   resources:
@@ -55,4 +57,20 @@ rules:
   resources:
   - nodes/log
   verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - list
   - get
