@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.25"
+__version__ = "0.3.26"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -248,6 +248,7 @@ try:
         print("k8s version:\t" + str(args.k8sver))
         print("ETCD vers:\t" + str(args.etcdver))
         print("Flannel vers:\t" + str(args.flannelver))
+        print("Cloudprovider:\t" + str(args.cloudprovider))
         print("Clustername:\t" + str(args.clustername))
         print("Cluster cidr:\t" + str(args.subnetcidr))
         print("Pod Cidr:\t" + str(args.podcidr))
