@@ -121,6 +121,7 @@ try:
 
             createNodeCert(lanip, "worker")
             worker_template = (cloudconf_template.render(
+                node=lanip.rsplit('.', 1)[1],
                 isworker=1,
                 workers=workers,
                 dnsserver=dnsserver,
