@@ -3,8 +3,16 @@ items:
 - apiVersion: rbac.authorization.k8s.io/v1
   kind: ClusterRole
   metadata:
-    name: cloud-controller-manager
+    name: system:cloud-controller-manager
   rules:
+  - apiGroups:
+    - ""
+    resources:
+    - configmaps
+    verbs:
+    - get
+    - list
+    - watch
   - apiGroups:
     - ""
     resources:
