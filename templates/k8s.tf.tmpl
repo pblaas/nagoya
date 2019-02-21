@@ -30,7 +30,7 @@ resource "openstack_networking_router_interface_v2" "k8s_{{ clustername }}_route
 
 resource "openstack_compute_servergroup_v2" "{{ clustername }}-sg" {
   name     = "{{ clustername }}-sg"
-  policies = ["anti-affinity"]
+  policies = ["soft-anti-affinity"]
 }
 
 resource "openstack_networking_secgroup_v2" "secgroup_{{ clustername }}-1" {
