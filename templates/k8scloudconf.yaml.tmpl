@@ -44,10 +44,6 @@ passwd:
         - "sudo"
         - "docker"
 
-docker:
-  flags:
-    - --debug
-
 {% if netoverlay != "calico" %}
 flannel:
   interface: {{ ipaddress }}
@@ -264,20 +260,6 @@ storage:
       contents:
         inline: |
           nameserver {{ dnsserver }}
-    - filesystem: "root"
-      path: "/home/core/.bashrc"
-      mode: 0644
-      contents:
-        inline: |
-          if [[ $- != *i* ]] ; then
-            return
-          fi
-          export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/opt/bin:$PWD
-    - filesystem: "root"
-      path: "/etc/motd.d/k8s.conf"
-      mode: 0644
-      contents:
-        local: "../motd.conf"
     - filesystem: "root"
       path:       "/etc/kubernetes/docker-environment.env"
       mode:       0644
