@@ -493,8 +493,8 @@ storage:
               - --tls-private-key-file=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node-key.pem
               - --client-ca-file=/etc/kubernetes/ssl/ca.pem
               - --service-account-key-file=/etc/kubernetes/ssl/sa-{{ clustername }}-k8s.pem
-              - --kubelet-client-certificate=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node.pem
-              - --kubelet-client-key=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node-key.pem
+              - --kubelet-client-certificate=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-kubelet-client.pem
+              - --kubelet-client-key=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-kubelet-client-key.pem
               - --requestheader-client-ca-file=/etc/kubernetes/ssl/front-proxy-client-ca.pem
               - --proxy-client-cert-file=/etc/kubernetes/ssl/front-proxy-client.pem
               - --proxy-client-key-file=/etc/kubernetes/ssl/front-proxy-client-key.pem

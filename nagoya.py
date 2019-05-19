@@ -149,6 +149,11 @@ try:
             subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-k8s-kube-cm-key.pem", "-out", nodeip + "-k8s-kube-cm.csr", "-subj", "/CN=system:kube-controller-manager", "-config", "openssl.cnf"], cwd='./tls')
             subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-kube-cm.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-kube-cm.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
+            """Creating kubelet client-certificate"""
+            nodeoctet = nodeip.rsplit('.')[3]
+            subprocess.call(["openssl", "genrsa", "-out", nodeip + "-k8s-kubelet-client-key.pem", "2048"], cwd='./tls')
+            subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-k8s-kubelet-client-key.pem", "-out", nodeip + "-k8s-kubelet-client.csr", "-subj", "/CN=system:masters", "-config", "openssl.cnf"], cwd='./tls')
+            subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-kubelet-client.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-kubelet-client.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
         else:
             openssltemplate = (opensslworker_template.render(
                 ipaddress=nodeip,
