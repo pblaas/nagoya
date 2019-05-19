@@ -57,6 +57,7 @@ try:
                 ipaddress=nodeip,
                 loadbalancer=(args.subnetcidr).rsplit('.', 1)[0] + ".3"
             ))
+
         else:
             openssltemplate = (opensslworker_template.render(
                 ipaddress=nodeip,
