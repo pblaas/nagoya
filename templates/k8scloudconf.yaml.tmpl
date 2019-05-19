@@ -326,7 +326,7 @@ storage:
       path: "/etc/kubernetes/ssl/{{ ipaddress }}-k8s-kube-cm.pem"
       mode: 0664
       contents:
-        local: "{{ ipaddress }}-k8s-kube-cm.pm"
+        local: "{{ ipaddress }}-k8s-kube-cm.pem"
     - filesystem: "root"
       path: "/etc/kubernetes/ssl/{{ ipaddress }}-k8s-kube-cm-key.pem"
       mode: 0664
