@@ -311,6 +311,28 @@ storage:
       mode: 0664
       contents:
         local: "{{ ipaddress }}-k8s-node.pem"
+{% if isworker != 1 %}
+    - filesystem: "root"
+      path: "/etc/kubernetes/ssl/{{ ipaddress }}-k8s-kube-scheduler.pem"
+      mode: 0664
+      contents:
+        local: "{{ ipaddress }}-k8s-kube-scheduler.pem"
+    - filesystem: "root"
+      path: "/etc/kubernetes/ssl/{{ ipaddress }}-k8s-kube-scheduler-key.pem"
+      mode: 0664
+      contents:
+        local: "{{ ipaddress }}-k8s-kube-scheduler-key.pem"
+    - filesystem: "root"
+      path: "/etc/kubernetes/ssl/{{ ipaddress }}-k8s-kube-cm.pem"
+      mode: 0664
+      contents:
+        local: "{{ ipaddress }}-k8s-kube-cm.pm"
+    - filesystem: "root"
+      path: "/etc/kubernetes/ssl/{{ ipaddress }}-k8s-kube-cm-key.pem"
+      mode: 0664
+      contents:
+        local: "{{ ipaddress }}-k8s-kube-cm-key.pem"
+{% endif %}
     - filesystem: "root"
       path: "/etc/kubernetes/ssl/ca.pem"
       mode: 0664
