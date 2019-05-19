@@ -367,6 +367,33 @@ storage:
       contents:
         local: "../kubeproxy.config"
     - filesystem: "root"
+      path: "/etc/kubernetes/kubeproxy-config.yaml"
+      mode: 0644
+      contents:
+        inline: |
+          apiVersion: v1
+          kind: Config
+          clusters:
+          - name: local
+            cluster:
+{% if isworker == 1 %}
+              server: https://{{ loadbalancer }}
+{% else %}
+              server: https://{{ ipaddress }}
+{% endif %}
+              certificate-authority: /etc/kubernetes/ssl/ca.pem
+          users:
+          - name: kubeproxy
+            user:
+              client-certificate: /etc/kubernetes/ssl/{{ ipaddress }}-k8s-kube-proxy.pem
+              client-key: /etc/kubernetes/ssl/{{ ipaddress }}-k8s-kube-proxy-key.pem
+          contexts:
+          - context:
+              cluster: local
+              user: kubeproxy
+            name: kubeproxy-context
+          current-context: kubeproxy-context
+    - filesystem: "root"
       path: "/etc/kubernetes/master-kubeconfig.yaml"
       mode: 0644
       contents:
@@ -567,7 +594,7 @@ storage:
               - mountPath: /etc/ssl/certs
                 name: ssl-certs-host
                 readOnly: true
-              - mountPath: /etc/kubernetes/master-kubeconfig.yaml
+              - mountPath: /etc/kubernetes/kubeproxy-config.yaml
                 name: "kubeconfig"
                 readOnly: true
               - mountPath: /etc/kubernetes/kubeproxy.config
@@ -582,7 +609,7 @@ storage:
               name: ssl-certs-host
             - name: "kubeconfig"
               hostPath:
-                path: "/etc/kubernetes/master-kubeconfig.yaml"
+                path: "/etc/kubernetes/kubeproxy-config.yaml"
             - name: "etc-kube-ssl"
               hostPath:
                 path: "/etc/kubernetes/ssl"
