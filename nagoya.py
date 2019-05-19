@@ -243,6 +243,15 @@ try:
             randomsalt += random.choice(choices)
         cryptedPass = crypt.crypt(password, '$6$%s$' % randomsalt)
 
+    def generateClusterID():
+        """Generate clusterID."""
+        randomsalt = ""
+        global clusterID
+        clusterID = ""
+        choices = string.ascii_uppercase + string.digits + string.ascii_lowercase
+        for _ in range(0, 12):
+            clusterID += random.choice(choices)
+
     def generateRandomString():
         """Generate a random String."""
         rndstring = ""
@@ -250,6 +259,10 @@ try:
         for _ in range(0, 10):
             rndstring += random.choice(choices)
         return rndstring
+
+    def createCertificateTarball(nodeip):
+        """Create tarball with PKI material"""
+        subprocess.Popen("cd tls; tar -czf ../node_" + (nodeip) + ".tgz " + (nodeip) + "-k8s-*.pem", shell=True, stdout=subprocess.PIPE)
 
     def returnPublicKey():
         """Retrieve rsa-ssh public key from OpenStack."""
@@ -267,6 +280,7 @@ try:
         """Print cluster info."""
         print("-" * 40 + "\n\nCluster Info:")
         print("Core password:\t" + str(password))
+        print("ClusterID:\t" + str(clusterID))
         print("Keypair:\t" + str(rsakey))
         print("k8s version:\t" + str(args.k8sver))
         print("ETCD vers:\t" + str(args.etcdver))
@@ -346,6 +360,8 @@ try:
     createFrontProxyCert()
     # Create core user passowrd
     generatePassword()
+    # Create clusterID
+    generateClusterID()
     returnPublicKey()
     returnDefaultSecurityGroupId()
     etcdtoken = generateRandomString()
