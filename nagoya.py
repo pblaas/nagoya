@@ -177,7 +177,6 @@ try:
         subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-k8s-kube-proxy-key.pem", "-out", nodeip + "-k8s-kube-proxy.csr", "-subj", "/CN=system:kube-proxy" + "/O=system:node-proxier", "-config", "openssl.cnf"], cwd='./tls')
         subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-kube-proxy.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-kube-proxy.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
-
     def createClientCert(user):
         """Create Client certificates."""
         print("client: " + user)
