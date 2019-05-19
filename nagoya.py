@@ -136,6 +136,19 @@ try:
                 ipaddress=nodeip,
                 loadbalancer=(args.subnetcidr).rsplit('.', 1)[0] + ".3"
             ))
+
+            """Creating Scheduler certificate"""
+            nodeoctet = nodeip.rsplit('.')[3]
+            subprocess.call(["openssl", "genrsa", "-out", nodeip + "-k8s-kube-scheduler-key.pem", "2048"], cwd='./tls')
+            subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-k8s-kube-scheduler-key.pem", "-out", nodeip + "-k8s-kube-scheduler.csr", "-subj", "/CN=system:kube-scheduler", "-config", "openssl.cnf"], cwd='./tls')
+            subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-kube-scheduler.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-kube-scheduler.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+
+            """Creating Controller Manager certificate"""
+            nodeoctet = nodeip.rsplit('.')[3]
+            subprocess.call(["openssl", "genrsa", "-out", nodeip + "-k8s-kube-cm-key.pem", "2048"], cwd='./tls')
+            subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-k8s-kube-cm-key.pem", "-out", nodeip + "-k8s-kube-cm.csr", "-subj", "/CN=system:kube-controller-manager", "-config", "openssl.cnf"], cwd='./tls')
+            subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-kube-cm.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-kube-cm.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+
         else:
             openssltemplate = (opensslworker_template.render(
                 ipaddress=nodeip,
