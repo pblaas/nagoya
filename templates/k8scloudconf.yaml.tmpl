@@ -289,12 +289,6 @@ storage:
             }
           }
     - filesystem: "root"
-      path: "/home/core/etcdinfo.sh"
-      mode: 0665
-      contents:
-        inline: |
-          /usr/bin/etcdctl --cert-file=/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node.pem --key-file=/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node-key.pem --ca-file=/etc/kubernetes/ssl/etcd-ca.pem  cluster-health
-    - filesystem: "root"
       path: "/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node-key.pem"
       mode: 0664
       contents:
