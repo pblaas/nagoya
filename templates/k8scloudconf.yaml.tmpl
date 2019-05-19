@@ -71,7 +71,7 @@ systemd:
         Type=oneshot
         [Install]
         WantedBy=multi-user.target
-{% if isworker = 1 %}
+{% if isworker == 1 %}
     - name: vm.max_map_count.service
       enabled: true
       contents: |
