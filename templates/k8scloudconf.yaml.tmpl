@@ -613,6 +613,8 @@ storage:
               - --service-account-private-key-file=/etc/kubernetes/ssl/sa-{{ clustername }}-k8s-key.pem
               - --root-ca-file=/etc/kubernetes/ssl/ca.pem
               - --kubeconfig=/etc/kubernetes/controller-manager.yaml
+              - --authentication-kubeconfig=/etc/kubernetes/controller-manager.yaml
+              - --authorization-kubeconfig=/etc/kubernetes/controller-manager.yaml
               - --v={{ apidebuglevel }}
               - --node-monitor-grace-period=120s
               - --node-monitor-period=10s
@@ -668,6 +670,8 @@ storage:
               - --master=http://127.0.0.1:8080
               - --leader-elect=true
               - --kubeconfig=/etc/kubernetes/scheduler.yaml
+              - --authentication-kubeconfig=/etc/kubernetes/scheduler.yaml
+              - --authorization-kubeconfig=/etc/kubernetes/scheduler.yaml              
               - --v={{ apidebuglevel }}
               resources:
                 requests:
