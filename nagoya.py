@@ -262,7 +262,7 @@ try:
 
     def createCertificateTarball(nodeip):
         """Create tarball with PKI material"""
-        subprocess.Popen("cd tls; tar -czf ../node_" + (nodeip) + ".tgz " + (nodeip) + "-k8s-*.pem", shell=True, stdout=subprocess.PIPE)
+        subprocess.Popen("cd tls; tar -czf ../" + (clusterID) + "-node_" + (nodeip) + ".tgz " + (nodeip) + "-k8s-*.pem", shell=True, stdout=subprocess.PIPE)
 
     def returnPublicKey():
         """Retrieve rsa-ssh public key from OpenStack."""
