@@ -71,6 +71,7 @@ systemd:
         Type=oneshot
         [Install]
         WantedBy=multi-user.target
+{% if isworker = 1 %}
     - name: vm.max_map_count.service
       enabled: true
       contents: |
@@ -147,6 +148,7 @@ systemd:
         Restart=on-failure
         [Install]
         WantedBy=multi-user.target
+{% endif %}
     - name: settimezone.service
       enabled: true
       contents: |
@@ -261,6 +263,11 @@ storage:
         inline: |
           nameserver {{ dnsserver }}
     - filesystem: "root"
+      path: "/etc/motd.d/k8s.conf"
+      mode: 0644
+      contents:
+        local: "../motd.conf"
+    - filesystem: "root"
       path:       "/etc/kubernetes/docker-environment.env"
       mode:       0644
       contents:
@@ -288,6 +295,12 @@ storage:
               "hairpinMode": true
             }
           }
+    - filesystem: "root"
+      path: "/home/core/etcdinfo.sh"
+      mode: 0665
+      contents:
+        inline: |
+          /usr/bin/etcdctl --cert-file=/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node.pem --key-file=/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node-key.pem --ca-file=/etc/kubernetes/ssl/etcd-ca.pem  cluster-health
     - filesystem: "root"
       path: "/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node-key.pem"
       mode: 0664
