@@ -312,6 +312,16 @@ storage:
       mode: 0664
       contents:
         local: "{{ ipaddress }}-k8s-node.pem"
+    - filesystem: "root"
+      path: "/etc/kubernetes/ssl/{{ ipaddress }}-k8s-kube-proxy-key.pem"
+      mode: 0664
+      contents:
+        local: "{{ ipaddress }}-k8s-kube-proxy-key.pem"
+    - filesystem: "root"
+      path: "/etc/kubernetes/ssl/{{ ipaddress }}-k8s-kube-proxy.pem"
+      mode: 0664
+      contents:
+        local: "{{ ipaddress }}-k8s-kube-proxy.pem"
 {% endif %}
     - filesystem: "root"
       path: "/etc/kubernetes/ssl/ca.pem"
