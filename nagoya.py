@@ -460,7 +460,7 @@ try:
             alphafeatures=args.alphafeatures,
             proxymode=args.proxymode,
             clusterid=clusterID,
-            remoteetcd=remoteetcd
+            remoteetcd=args.remoteetcd
         ))
 
         with open(nodeyaml, 'w') as controller:
