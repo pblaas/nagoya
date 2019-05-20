@@ -743,31 +743,6 @@ storage:
               hostPath:
                 path: "/etc/kubernetes/ssl"
     - filesystem: "root"
-      path: "/etc/kubernetes/ssl/sa-{{ clustername }}-k8s-key.pem"
-      mode: 0664
-      contents:
-        local: "sa-{{ clustername }}-k8s-key.pem"
-    - filesystem: "root"
-      path: "/etc/kubernetes/ssl/sa-{{ clustername }}-k8s.pem"
-      mode: 0664
-      contents:
-        local: "sa-{{ clustername }}-k8s.pem"
-    - filesystem: "root"
-      path: "/etc/kubernetes/ssl/front-proxy-client-key.pem"
-      mode: 0664
-      contents:
-        local: "front-proxy-client-key.pem"
-    - filesystem: "root"
-      path: "/etc/kubernetes/ssl/front-proxy-client.pem"
-      mode: 0664
-      contents:
-        local: "front-proxy-client.pem"
-    - filesystem: "root"
-      path: "/etc/kubernetes/ssl/front-proxy-client-ca.pem"
-      mode: 0664
-      contents:
-        local: "front-proxy-client-ca.pem"
-    - filesystem: "root"
       path: "/tmp/remote-etcd-ca.pem"
       mode: 0664
       contents:
