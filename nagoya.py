@@ -279,9 +279,7 @@ try:
 
     def initCertsOnEtcd(nodeip, clusterID, clustername, remoteetcd, action):
         """Publish certificates on remote etcd"""
-        pkilist = [nodeip + "-etcd-node-key.pem",
-                   nodeip + "-etcd-node.pem",
-                   nodeip + "-k8s-kube-cm-key.pem",
+        pkilist = [nodeip + "-k8s-kube-cm-key.pem",
                    nodeip + "-k8s-kube-cm.pem",
                    nodeip + "-k8s-kube-proxy-key.pem",
                    nodeip + "-k8s-kube-proxy.pem",
