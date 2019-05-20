@@ -277,6 +277,33 @@ try:
         defaultsecuritygroupid = subprocess.Popen("openstack security group list -f value -c ID -c Name | grep default", shell=True, stdout=subprocess.PIPE).stdout.read().split(" ")[0]
         return defaultsecuritygroupid
 
+    def initCertsOnEtcd(nodeip, clusterID, clustername, remoteetcd, action):
+        """Publish certificates on remote etcd"""
+        pkilist = [nodeip + "-etcd-node-key.pem",
+                   nodeip + "-etcd-node.pem",
+                   nodeip + "-k8s-kube-cm-key.pem",
+                   nodeip + "-k8s-kube-cm.pem",
+                   nodeip + "-k8s-kube-proxy-key.pem",
+                   nodeip + "-k8s-kube-proxy.pem",
+                   nodeip + "-k8s-kube-scheduler-key.pem",
+                   nodeip + "-k8s-kube-scheduler.pem",
+                   nodeip + "-k8s-kubelet-client-key.pem",
+                   nodeip + "-k8s-kubelet-client.pem",
+                   nodeip + "-k8s-node-key.pem",
+                   nodeip + "-k8s-node.pem",
+                   "sa-" + clustername + "-k8s-key.pem",
+                   "sa-" + clustername + "-k8s.pem",
+                   "front-proxy-client.pem",
+                   "front-proxy-client-key.pem",
+                   "front-proxy-client-ca.pem",
+                   "front-proxy-client-ca-key.pem"
+                   ]
+        for x in pkilist:
+            if "push" in action:
+                subprocess.Popen("cat ./tls/" + x + " | ETCDCTL_API=3 etcdctl --endpoints=" + remoteetcd + " --cacert=./remote-etcd-ca.pem --cert=./remote-etcd-client-crt.pem --key=./remote-etcd-client-key.pem put " + clusterID + "_" + x)
+            if "deploy" in action:
+                subprocess.Popen("ETCDCTL_API=3 etcdctl --endpoints=" + remoteetcd + " --cacert=./remote-etcd-ca.pem --cert=./remote-etcd-client-crt.pem --key=./remote-etcd-client-key.pem --print-value-only=true get " + clusterID + "_" + x + " > /etc/kubernetes/ssl/" + x)
+
     def printClusterInfo():
         """Print cluster info."""
         print("-" * 40 + "\n\nCluster Info:")
@@ -432,6 +459,7 @@ try:
         lanip = str(args.subnetcidr.rsplit('.', 1)[0] + "." + str(node))
         nodeyaml = str("node_" + lanip.rstrip(' ') + ".yaml")
         createNodeCert(lanip, "manager")
+        initCertsOnEtcd(lanip, clusterID, args.clustername, args.remoteetcd, "push")
 
         manager_template = (cloudconf_template.render(
             node=node,
