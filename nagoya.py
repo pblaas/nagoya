@@ -299,10 +299,12 @@ try:
                    "front-proxy-client-ca-key.pem"
                    ]
         for x in pkilist:
+            my_env = os.environ.copy()
+            my_env["ETCDCTL_API"] = "3"
             if "push" in action:
-                subprocess.Popen("cat ./tls/" + x + " | ETCDCTL_API=3 etcdctl --endpoints=" + remoteetcd + " --cacert=./remote-etcd-ca.pem --cert=./remote-etcd-client-crt.pem --key=./remote-etcd-client-key.pem put " + clusterID + "_" + x)
+                subprocess.Popen(env=my_env, "cat ./tls/" + x + " | etcdctl --endpoints=" + remoteetcd + " --cacert=./remote-etcd-ca.pem --cert=./remote-etcd-client-crt.pem --key=./remote-etcd-client-key.pem put " + clusterID + "_" + x)
             if "deploy" in action:
-                subprocess.Popen("ETCDCTL_API=3 etcdctl --endpoints=" + remoteetcd + " --cacert=./remote-etcd-ca.pem --cert=./remote-etcd-client-crt.pem --key=./remote-etcd-client-key.pem --print-value-only=true get " + clusterID + "_" + x + " > /etc/kubernetes/ssl/" + x)
+                subprocess.Popen(env=my_env, "etcdctl --endpoints=" + remoteetcd + " --cacert=./remote-etcd-ca.pem --cert=./remote-etcd-client-crt.pem --key=./remote-etcd-client-key.pem --print-value-only=true get " + clusterID + "_" + x + " > /etc/kubernetes/ssl/" + x)
 
     def printClusterInfo():
         """Print cluster info."""
