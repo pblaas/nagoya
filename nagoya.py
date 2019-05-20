@@ -302,9 +302,11 @@ try:
             my_env = os.environ.copy()
             my_env["ETCDCTL_API"] = "3"
             if "push" in action:
-                subprocess.Popen(env=my_env, "cat ./tls/" + x + " | etcdctl --endpoints=" + remoteetcd + " --cacert=./remote-etcd-ca.pem --cert=./remote-etcd-client-crt.pem --key=./remote-etcd-client-key.pem put " + clusterID + "_" + x)
+                pushcmd = ("cat ./tls/" + (x) + " | etcdctl --endpoints=" + (remoteetcd) + " --cacert=./remote-etcd-ca.pem --cert=./remote-etcd-client-crt.pem --key=./remote-etcd-client-key.pem put " + (clusterID) + "_" + (x), env=my_env)
+                subprocess.Popen(pushcmd, env=my_env, shell=True)
             if "deploy" in action:
-                subprocess.Popen(env=my_env, "etcdctl --endpoints=" + remoteetcd + " --cacert=./remote-etcd-ca.pem --cert=./remote-etcd-client-crt.pem --key=./remote-etcd-client-key.pem --print-value-only=true get " + clusterID + "_" + x + " > /etc/kubernetes/ssl/" + x)
+                deploycmd = ("etcdctl --endpoints=" + (remoteetcd) + " --cacert=./remote-etcd-ca.pem --cert=./remote-etcd-client-crt.pem --key=./remote-etcd-client-key.pem --print-value-only=true get " + (clusterID) + "_" + (x) + " > /etc/kubernetes/ssl/" + (x))
+                subprocess.Popen(deploycmd, env=my_env, shell=True)
 
     def printClusterInfo():
         """Print cluster info."""
