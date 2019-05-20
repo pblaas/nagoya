@@ -457,7 +457,9 @@ try:
             ipaddress=lanip,
             ipaddressgw=(args.subnetcidr).rsplit('.', 1)[0] + ".1",
             alphafeatures=args.alphafeatures,
-            proxymode=args.proxymode
+            proxymode=args.proxymode,
+            clusterid=clusterID,
+            remoteurl=remoteURL
         ))
 
         with open(nodeyaml, 'w') as controller:
