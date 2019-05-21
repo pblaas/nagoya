@@ -14,7 +14,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.31"
+__version__ = "0.3.32"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -168,34 +168,62 @@ try:
             subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-k8s-kubelet-client-key.pem", "-out", nodeip + "-k8s-kubelet-client.csr", "-subj", "/CN=kubelet-api-client" + "/O=system:masters", "-config", "openssl.cnf"], cwd='./tls')
             subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-kubelet-client.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-kubelet-client.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
+            openssltemplate = (etcd_openssl_template.render(
+                ipaddress=nodeip,
+            ))
+
+            with open('./tls/openssl.cnf', 'w') as openssl:
+                openssl.write(openssltemplate)
+
+            # ${i}-etcd-worker.pem
+            subprocess.call(["openssl", "genrsa", "-out", nodeip + "-etcd-node-key.pem", "2048"], cwd='./tls')
+            subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-etcd-node-key.pem", "-out", nodeip + "-etcd-node.csr", "-subj", "/CN=" + nodeip + "-etcd-node", "-config", "openssl.cnf"], cwd='./tls')
+            subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-etcd-node.csr", "-CA", "etcd-ca.pem", "-CAkey", "etcd-ca-key.pem", "-CAcreateserial", "-out", nodeip + "-etcd-node.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+
+            openssltemplate = (opensslworker_template.render(
+                ipaddress=nodeip,
+            ))
+
+            with open('./tls/openssl.cnf', 'w') as openssl:
+                openssl.write(openssltemplate)
+
+            nodeoctet = nodeip.rsplit('.')[3]
+            subprocess.call(["openssl", "genrsa", "-out", nodeip + "-k8s-node-key.pem", "2048"], cwd='./tls')
+            subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-k8s-node-key.pem", "-out", nodeip + "-k8s-node.csr", "-subj", "/CN=system:node:k8s-" + str(args.clustername) + "-node" + str(nodeoctet) + "/O=system:nodes", "-config", "openssl.cnf"], cwd='./tls')
+            subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-node.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-node.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+
+            subprocess.call(["openssl", "genrsa", "-out", nodeip + "-k8s-kube-proxy-key.pem", "2048"], cwd='./tls')
+            subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-k8s-kube-proxy-key.pem", "-out", nodeip + "-k8s-kube-proxy.csr", "-subj", "/CN=system:kube-proxy" + "/O=system:node-proxier", "-config", "openssl.cnf"], cwd='./tls')
+            subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-kube-proxy.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-kube-proxy.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+
         else:
             openssltemplate = (opensslworker_template.render(
                 ipaddress=nodeip,
             ))
 
-        with open('./tls/openssl.cnf', 'w') as openssl:
-            openssl.write(openssltemplate)
+            with open('./tls/openssl.cnf', 'w') as openssl:
+                openssl.write(openssltemplate)
 
-        nodeoctet = nodeip.rsplit('.')[3]
-        subprocess.call(["openssl", "genrsa", "-out", nodeip + "-k8s-node-key.pem", "2048"], cwd='./tls')
-        subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-k8s-node-key.pem", "-out", nodeip + "-k8s-node.csr", "-subj", "/CN=system:node:k8s-" + str(args.clustername) + "-node" + str(nodeoctet) + "/O=system:nodes", "-config", "openssl.cnf"], cwd='./tls')
-        subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-node.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-node.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+            nodeoctet = nodeip.rsplit('.')[3]
+            subprocess.call(["openssl", "genrsa", "-out", nodeip + "-k8s-node-key.pem", "2048"], cwd='./tls')
+            subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-k8s-node-key.pem", "-out", nodeip + "-k8s-node.csr", "-subj", "/CN=system:node:k8s-" + str(args.clustername) + "-node" + str(nodeoctet) + "/O=system:nodes", "-config", "openssl.cnf"], cwd='./tls')
+            subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-node.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-node.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
-        subprocess.call(["openssl", "genrsa", "-out", nodeip + "-k8s-kube-proxy-key.pem", "2048"], cwd='./tls')
-        subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-k8s-kube-proxy-key.pem", "-out", nodeip + "-k8s-kube-proxy.csr", "-subj", "/CN=system:kube-proxy" + "/O=system:node-proxier", "-config", "openssl.cnf"], cwd='./tls')
-        subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-kube-proxy.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-kube-proxy.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+            subprocess.call(["openssl", "genrsa", "-out", nodeip + "-k8s-kube-proxy-key.pem", "2048"], cwd='./tls')
+            subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-k8s-kube-proxy-key.pem", "-out", nodeip + "-k8s-kube-proxy.csr", "-subj", "/CN=system:kube-proxy" + "/O=system:node-proxier", "-config", "openssl.cnf"], cwd='./tls')
+            subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-kube-proxy.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-kube-proxy.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
-        openssltemplate = (etcd_openssl_template.render(
-            ipaddress=nodeip,
-        ))
+            openssltemplate = (etcd_openssl_template.render(
+                ipaddress=nodeip,
+            ))
 
-        with open('./tls/openssl.cnf', 'w') as openssl:
-            openssl.write(openssltemplate)
+            with open('./tls/openssl.cnf', 'w') as openssl:
+                openssl.write(openssltemplate)
 
-        # ${i}-etcd-worker.pem
-        subprocess.call(["openssl", "genrsa", "-out", nodeip + "-etcd-node-key.pem", "2048"], cwd='./tls')
-        subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-etcd-node-key.pem", "-out", nodeip + "-etcd-node.csr", "-subj", "/CN=" + nodeip + "-etcd-node", "-config", "openssl.cnf"], cwd='./tls')
-        subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-etcd-node.csr", "-CA", "etcd-ca.pem", "-CAkey", "etcd-ca-key.pem", "-CAcreateserial", "-out", nodeip + "-etcd-node.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+            # ${i}-etcd-worker.pem
+            subprocess.call(["openssl", "genrsa", "-out", nodeip + "-etcd-node-key.pem", "2048"], cwd='./tls')
+            subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-etcd-node-key.pem", "-out", nodeip + "-etcd-node.csr", "-subj", "/CN=" + nodeip + "-etcd-node", "-config", "openssl.cnf"], cwd='./tls')
+            subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-etcd-node.csr", "-CA", "etcd-ca.pem", "-CAkey", "etcd-ca-key.pem", "-CAcreateserial", "-out", nodeip + "-etcd-node.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
     def createClientCert(user):
         """Create Client certificates."""
