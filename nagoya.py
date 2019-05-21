@@ -14,7 +14,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.30"
+__version__ = "0.3.31"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -76,7 +76,7 @@ parser.add_argument("--workerimageflavor", help="Worker image flavor ID - (2008)
 parser.add_argument("--glanceimagename", help="Glance image name ID - (Container Linux CoreOS (third-party))", default="Container Linux CoreOS (third-party)")
 parser.add_argument("--dnsserver", help="DNS server - (8.8.8.8)", default="8.8.8.8")
 parser.add_argument("--cloudprovider", help="Cloud provider support - (openstack)", choices=['openstack', 'external'], default="openstack")
-parser.add_argument("--k8sver", help="Hyperkube version - (v1.14.0)", default="v1.14.0")
+parser.add_argument("--k8sver", help="Hyperkube version - (v1.14.2)", default="v1.14.2")
 parser.add_argument("--etcdver", help="ETCD version - (3.3.13)", default="3.3.13")
 parser.add_argument("--flannelver", help="Flannel image version - (0.11.0)", default="0.11.0")
 parser.add_argument("--netoverlay", help="Network overlay - (flannel)", choices=['flannel', 'calico'], default="flannel")
