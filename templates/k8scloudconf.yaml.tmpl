@@ -743,17 +743,17 @@ storage:
               hostPath:
                 path: "/etc/kubernetes/ssl"
     - filesystem: "root"
-      path: "/tmp/remote-etcd-ca.pem"
+      path: "/etc/kubernetes/ssl/remote-etcd-ca.pem"
       mode: 0664
       contents:
         local: "../remote-etcd-ca.pem"
     - filesystem: "root"
-      path: "/tmp/remote-etcd-client-crt.pem"
+      path: "/etc/kubernetes/ssl/remote-etcd-client-crt.pem"
       mode: 0664
       contents:
         local: "../remote-etcd-client-crt.pem"
     - filesystem: "root"
-      path: "/tmp/remote-etcd-client-key.pem"
+      path: "/etc/kubernetes/ssl/remote-etcd-client-key.pem"
       mode: 0664
       contents:
         local: "../remote-etcd-client-key.pem"
