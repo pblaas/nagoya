@@ -37,11 +37,11 @@ if "OS_REGION_NAME" not in os.environ:
 if "OS_AUTH_URL" not in os.environ:
     os.environ["OS_AUTH_URL"] = "Default"
 
-remotecrtlist = [ "./remote-etcd-ca.pem", "./remote-etcd-client-crt.pem", "./remote-etcd-client-key.pem" ]
+remotecrtlist = ["./remote-etcd-ca.pem", "./remote-etcd-client-crt.pem", "./remote-etcd-client-key.pem"]
 for x in remotecrtlist:
-    if ( not os.path.isfile(x)) and (not os.access(x, os.R_OK)):
+    if (not os.path.isfile(x)) and (not os.access(x, os.R_OK)):
         print "Either the file(" + x + ") is missing or not readable. Unable to continue."
-	sys.exit(1)
+        sys.exit(1)
 
 
 def ValidateDNS(v):
