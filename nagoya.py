@@ -170,6 +170,7 @@ try:
 
             openssltemplate = (etcd_openssl_template.render(
                 ipaddress=nodeip,
+                loadbalancer=(args.subnetcidr).rsplit('.', 1)[0] + ".3"
             ))
 
             with open('./tls/openssl.cnf', 'w') as openssl:
@@ -215,6 +216,7 @@ try:
 
             openssltemplate = (etcd_openssl_template.render(
                 ipaddress=nodeip,
+                loadbalancer=(args.subnetcidr).rsplit('.', 1)[0] + ".3"
             ))
 
             with open('./tls/openssl.cnf', 'w') as openssl:
