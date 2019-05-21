@@ -71,6 +71,19 @@ systemd:
         Type=oneshot
         [Install]
         WantedBy=multi-user.target
+{% if isworker != 1 %}
+    - name: deploy_controlplane_certs.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Deploy Controlplane certs from remote ETCD
+        [Service]
+        ExecStart=/bin/sh -c "/home/core/deploycerts.sh {{ ipaddress }} {{ clusterid }} {{ clustername }} {{ remoteetcd }} deploy"
+        RemainAfterExit=yes
+        Type=oneshot
+        [Install]
+        WantedBy=multi-user.target
+{% endif %}
 {% if isworker == 1 %}
     - name: vm.max_map_count.service
       enabled: true
@@ -757,4 +770,9 @@ storage:
       mode: 0664
       contents:
         local: "../remote-etcd-client-key.pem"
+    - filesystem: "root"
+      path: "/home/core/deploycerts.sh"
+      mode: 0751
+      contents:
+        local: "../templates/deploycerts.sh"
 {% endif %}
