@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.29"
+__version__ = "0.3.30"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -34,6 +34,12 @@ if "OS_REGION_NAME" not in os.environ:
     os.environ["OS_REGION_NAME"] = "Default"
 if "OS_AUTH_URL" not in os.environ:
     os.environ["OS_AUTH_URL"] = "Default"
+
+remotecrtlist = [ "./remote-etcd-ca.pem", "./remote-etcd-client-crt.pem", "./remote-etcd-client-key.pem" ]
+for x in remotecrtlist:
+    if ( not os.path.isfile(x)) and (not os.access(x, os.R_OK)):
+        print "Either the file(" + x + ") is missing or not readable. Unable to continue."
+	sys.exit(1)
 
 
 def ValidateDNS(v):
