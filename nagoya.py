@@ -3,6 +3,8 @@
 
 import argparse
 import os
+import os.path
+import sys
 import subprocess
 import base64
 import crypt
