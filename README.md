@@ -1,27 +1,33 @@
 # nagoya
-Next development iteration of my terraformed kubernetes deploy scripts to produce Container Linux config files and Terraform files for bootstrapping Kubernetes on OpenStack.
+Deploy scripts to produce Container Linux config files and Terraform files to bootstrapping Kubernetes on OpenStack.
 
-This project has a lot of similarities to project kioto but differs on the following:
-* nagoya is based on etcd3
-* nagoya is based on Container Linux Configs instead of CloudConfig files
+Since kubernetes v1.14 the nagoya scripts use additional PKI for segregation of permissions in combination with RBAC.
+This change led to much bigger ignition files which are loaded with CoreOS as user-data in the boot stage. The igition files on the masters exceeded 65k bytes which prevented CoreOS to load this data on boot due to OpenStack limits and forced me to provide another solution to bootstrap a fresh cluster.
+
+To mitigate this issue as of nagoya scripts v1.14 a seperate ETCD system is required. This ETCD system will be used to store the PKI infrastructure which in turn will be read again by CoreOS on boot and placed in the proper locations.
+
+Benefit of this system is the renewal of the PKI infrastructure can be staged on the remote ETCD server and will automaticly be picked up after the nodes are rebooted.
+
 
 
 ### Getting Started
 
 To get started with this nagoya script to deploy a high available kubernetes cluster you can follow the following guide lines:
 1. Make sure you have loaded the OpenStack environment variables and can talk with the OpenStack API with tools like openstack and nova. You can also use a docker container for this: docker.io/pblaas/openstack-cli:latest.
-2. Clone the git project
+2. Make sure you have a ETCD version 3 server online and reachable from the kubernetes network you are about to spin up and have a client certificate set available.
+3. Clone the git project
   * `git clone https://github.com/pblaas/nagoya`
-3. Request two new floating ip adresses,
+4. ETCD client certificate should be named remote-etcd-ca.pem remote-etcd-client-crt.pem and remote-etcd-client-key.pem and places in the root dir of the nagoya project.
+5. Request two new floating ip adresses,
   * `openstack floating ip create floating`
-4. Run the nagoya script. When deploying your first cluster you don't have to use all the available flags. The script will prepare the terraform config file and the Ignition files for CoreOS Container Linux.
+6. Run the nagoya script. When deploying your first cluster you don't have to use all the available flags. The script will prepare the terraform config file and the Ignition files for CoreOS Container Linux.
   * `./nagoya.py "YOURKEYPAIR_NAME" "FIRSTFLOATINGIP" "SECONDFLOATINGIP" --workers 3`
-5. Optional verify the result status information if it matches your desired cluster spec. If not to your liking run the command again with additional or altered flags.
-6. Instruct terraform to apply the config on OpenStack.
+7. Optional verify the result status information if it matches your desired cluster spec. If not to your liking run the command again with additional or altered flags.
+8. Instruct terraform to apply the config on OpenStack.
   * `terraform init && terraform plan && terraform apply`
-7. Load the generated kubernetes config
+9. Load the generated kubernetes config
   * `sh kubeconfig.sh`
-8. You can run a watch command and see when the cluster will come online. This could take a couple of minutes.
+10. You can run a watch command and see when the cluster will come online. This could take a couple of minutes.
   * `watch kubectl get nodes`
 
 You should now have a fully functional kubernetes cluster which is fully compliant with conformance tests. To test conformance you can use a free available service by Heptio: https://scanner.heptio.com/
@@ -40,7 +46,7 @@ usage: nagoya.py [-h] [--username USERNAME] [--projectname PROJECTNAME]
                  [--apidebuglevel {1,2,3,4,5,6,7,8,9,10}]
                  [--proxymode {ipvs,iptables}] [--alphafeatures {true,false}]
                  [--availabilityzone AVAILABILITYZONE]
-                 [--externalnetid EXTERNALNETID]
+                 [--externalnetid EXTERNALNETID] [--remoteetcd REMOTEETCD]
                  keypair floatingip1 floatingip2
 
 positional arguments:
@@ -73,10 +79,10 @@ optional arguments:
                         DNS server - (8.8.8.8)
   --cloudprovider {openstack,external}
                         Cloud provider support - (openstack)
-  --k8sver K8SVER       Hyperkube version - (v1.12.1)
-  --etcdver ETCDVER     ETCD version - (3.3.9)
+  --k8sver K8SVER       Hyperkube version - (v1.14.0)
+  --etcdver ETCDVER     ETCD version - (3.3.13)
   --flannelver FLANNELVER
-                        Flannel image version - (0.10.0)
+                        Flannel image version - (0.11.0)
   --netoverlay {flannel,calico}
                         Network overlay - (flannel)
   --rbac {true,false}   RBAC mode - (false)
@@ -91,6 +97,8 @@ optional arguments:
   --externalnetid EXTERNALNETID
                         External network id - (f9c73cd5-9e7b-4bfd-89eb-
                         c2f4f584c326)
+  --remoteetcd REMOTEETCD
+                        Remote ETCD server
 ```
 
 #### Features
