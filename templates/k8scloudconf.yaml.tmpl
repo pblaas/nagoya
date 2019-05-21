@@ -44,10 +44,6 @@ passwd:
         - "sudo"
         - "docker"
 
-docker:
-  flags:
-    - --debug
-
 {% if netoverlay != "calico" %}
 flannel:
   interface: {{ ipaddress }}
@@ -75,6 +71,7 @@ systemd:
         Type=oneshot
         [Install]
         WantedBy=multi-user.target
+{% if isworker == 1 %}
     - name: vm.max_map_count.service
       enabled: true
       contents: |
@@ -151,6 +148,7 @@ systemd:
         Restart=on-failure
         [Install]
         WantedBy=multi-user.target
+{% endif %}
     - name: settimezone.service
       enabled: true
       contents: |
@@ -265,15 +263,6 @@ storage:
         inline: |
           nameserver {{ dnsserver }}
     - filesystem: "root"
-      path: "/home/core/.bashrc"
-      mode: 0644
-      contents:
-        inline: |
-          if [[ $- != *i* ]] ; then
-            return
-          fi
-          export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/opt/bin:$PWD
-    - filesystem: "root"
       path: "/etc/motd.d/k8s.conf"
       mode: 0644
       contents:
@@ -312,6 +301,7 @@ storage:
       contents:
         inline: |
           /usr/bin/etcdctl --cert-file=/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node.pem --key-file=/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node-key.pem --ca-file=/etc/kubernetes/ssl/etcd-ca.pem  cluster-health
+{% if isworker == 1 %}
     - filesystem: "root"
       path: "/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node-key.pem"
       mode: 0664
@@ -322,6 +312,17 @@ storage:
       mode: 0664
       contents:
         local: "{{ ipaddress }}-k8s-node.pem"
+    - filesystem: "root"
+      path: "/etc/kubernetes/ssl/{{ ipaddress }}-k8s-kube-proxy-key.pem"
+      mode: 0664
+      contents:
+        local: "{{ ipaddress }}-k8s-kube-proxy-key.pem"
+    - filesystem: "root"
+      path: "/etc/kubernetes/ssl/{{ ipaddress }}-k8s-kube-proxy.pem"
+      mode: 0664
+      contents:
+        local: "{{ ipaddress }}-k8s-kube-proxy.pem"
+{% endif %}
     - filesystem: "root"
       path: "/etc/kubernetes/ssl/ca.pem"
       mode: 0664
@@ -378,6 +379,33 @@ storage:
       contents:
         local: "../kubeproxy.config"
     - filesystem: "root"
+      path: "/etc/kubernetes/kubeproxy-config.yaml"
+      mode: 0644
+      contents:
+        inline: |
+          apiVersion: v1
+          kind: Config
+          clusters:
+          - name: local
+            cluster:
+{% if isworker == 1 %}
+              server: https://{{ loadbalancer }}
+{% else %}
+              server: https://{{ ipaddress }}
+{% endif %}
+              certificate-authority: /etc/kubernetes/ssl/ca.pem
+          users:
+          - name: kubeproxy
+            user:
+              client-certificate: /etc/kubernetes/ssl/{{ ipaddress }}-k8s-kube-proxy.pem
+              client-key: /etc/kubernetes/ssl/{{ ipaddress }}-k8s-kube-proxy-key.pem
+          contexts:
+          - context:
+              cluster: local
+              user: kubeproxy
+            name: kubeproxy-context
+          current-context: kubeproxy-context
+    - filesystem: "root"
       path: "/etc/kubernetes/master-kubeconfig.yaml"
       mode: 0644
       contents:
@@ -404,6 +432,54 @@ storage:
               user: kubelet
             name: kubelet-context
           current-context: kubelet-context
+{% if isworker != 1 %}
+    - filesystem: "root"
+      path: "/etc/kubernetes/controller-manager.yaml"
+      mode: 0644
+      contents:
+        inline: |
+          apiVersion: v1
+          kind: Config
+          clusters:
+          - name: local
+            cluster:
+              server: https://{{ ipaddress }}
+              certificate-authority: /etc/kubernetes/ssl/ca.pem
+          users:
+          - name: kube-controller-manager
+            user:
+              client-certificate: /etc/kubernetes/ssl/{{ ipaddress }}-k8s-kube-cm.pem
+              client-key: /etc/kubernetes/ssl/{{ ipaddress }}-k8s-kube-cm-key.pem
+          contexts:
+          - context:
+              cluster: local
+              user: kube-controller-manager
+            name: kube-controller-manager-context
+          current-context: kube-controller-manager-context
+    - filesystem: "root"
+      path: "/etc/kubernetes/scheduler.yaml"
+      mode: 0644
+      contents:
+        inline: |
+          apiVersion: v1
+          kind: Config
+          clusters:
+          - name: local
+            cluster:
+              server: https://{{ ipaddress }}
+              certificate-authority: /etc/kubernetes/ssl/ca.pem
+          users:
+          - name: kube-scheduler
+            user:
+              client-certificate: /etc/kubernetes/ssl/{{ ipaddress }}-k8s-kube-scheduler.pem
+              client-key: /etc/kubernetes/ssl/{{ ipaddress }}-k8s-kube-scheduler-key.pem
+          contexts:
+          - context:
+              cluster: local
+              user: kube-scheduler
+            name: kube-scheduler-context
+          current-context: kube-scheduler-context
+{% endif %}
     - filesystem: "root"
       path: /etc/ntp.conf
       mode: 0644
@@ -446,18 +522,18 @@ storage:
               - --secure-port=443
               - --advertise-address={{ ipaddress }}
 {% if alphafeatures == "true" %}
-              - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,Priority,ResourceQuota,NodeRestriction,Initializers
-              - --runtime-config=extensions/v1beta1/networkpolicies=true,admissionregistration.k8s.io/v1alpha1
+              - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,Priority,ResourceQuota,NodeRestriction
+              - --runtime-config=extensions/v1beta1/networkpolicies=true
 {% else %}
-              - --enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,Priority,ResourceQuota,NodeRestriction,Initializers
-              - --runtime-config=extensions/v1beta1/networkpolicies=true,admissionregistration.k8s.io/v1alpha1
+              - --enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,Priority,ResourceQuota,NodeRestriction
+              - --runtime-config=extensions/v1beta1/networkpolicies=true
 {% endif %}
               - --tls-cert-file=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node.pem
               - --tls-private-key-file=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node-key.pem
               - --client-ca-file=/etc/kubernetes/ssl/ca.pem
               - --service-account-key-file=/etc/kubernetes/ssl/sa-{{ clustername }}-k8s.pem
-              - --kubelet-client-certificate=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node.pem
-              - --kubelet-client-key=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node-key.pem
+              - --kubelet-client-certificate=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-kubelet-client.pem
+              - --kubelet-client-key=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-kubelet-client-key.pem
               - --requestheader-client-ca-file=/etc/kubernetes/ssl/front-proxy-client-ca.pem
               - --proxy-client-cert-file=/etc/kubernetes/ssl/front-proxy-client.pem
               - --proxy-client-key-file=/etc/kubernetes/ssl/front-proxy-client-key.pem
@@ -530,7 +606,7 @@ storage:
               - mountPath: /etc/ssl/certs
                 name: ssl-certs-host
                 readOnly: true
-              - mountPath: /etc/kubernetes/master-kubeconfig.yaml
+              - mountPath: /etc/kubernetes/kubeproxy-config.yaml
                 name: "kubeconfig"
                 readOnly: true
               - mountPath: /etc/kubernetes/kubeproxy.config
@@ -545,7 +621,7 @@ storage:
               name: ssl-certs-host
             - name: "kubeconfig"
               hostPath:
-                path: "/etc/kubernetes/master-kubeconfig.yaml"
+                path: "/etc/kubernetes/kubeproxy-config.yaml"
             - name: "etc-kube-ssl"
               hostPath:
                 path: "/etc/kubernetes/ssl"
@@ -575,7 +651,9 @@ storage:
               - --leader-elect=true
               - --service-account-private-key-file=/etc/kubernetes/ssl/sa-{{ clustername }}-k8s-key.pem
               - --root-ca-file=/etc/kubernetes/ssl/ca.pem
-              - --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml
+              - --kubeconfig=/etc/kubernetes/controller-manager.yaml
+              - --authentication-kubeconfig=/etc/kubernetes/controller-manager.yaml
+              - --authorization-kubeconfig=/etc/kubernetes/controller-manager.yaml
               - --v={{ apidebuglevel }}
               - --node-monitor-grace-period=120s
               - --node-monitor-period=10s
@@ -597,7 +675,7 @@ storage:
                 initialDelaySeconds: 15
                 timeoutSeconds: 15
               volumeMounts:
-              - mountPath: /etc/kubernetes/master-kubeconfig.yaml
+              - mountPath: /etc/kubernetes/controller-manager.yaml
                 name: kubeconfig
                 readOnly: true
               - mountPath: /etc/kubernetes/ssl
@@ -606,7 +684,7 @@ storage:
             volumes:
             - name: kubeconfig
               hostPath:
-                path: /etc/kubernetes/master-kubeconfig.yaml
+                path: /etc/kubernetes/controller-manager.yaml
             - name: etc-kube-ssl
               hostPath:
                 path: /etc/kubernetes/ssl
@@ -630,7 +708,9 @@ storage:
               - scheduler
               - --master=http://127.0.0.1:8080
               - --leader-elect=true
-              - --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml
+              - --kubeconfig=/etc/kubernetes/scheduler.yaml
+              - --authentication-kubeconfig=/etc/kubernetes/scheduler.yaml
+              - --authorization-kubeconfig=/etc/kubernetes/scheduler.yaml              
               - --v={{ apidebuglevel }}
               resources:
                 requests:
@@ -646,7 +726,7 @@ storage:
               - mountPath: /etc/ssl/certs
                 name: ssl-certs-host
                 readOnly: true
-              - mountPath: /etc/kubernetes/master-kubeconfig.yaml
+              - mountPath: /etc/kubernetes/scheduler.yaml
                 name: "kubeconfig"
                 readOnly: true
               - mountPath: /etc/kubernetes/ssl
@@ -658,33 +738,23 @@ storage:
               name: ssl-certs-host
             - name: "kubeconfig"
               hostPath:
-                path: "/etc/kubernetes/master-kubeconfig.yaml"
+                path: "/etc/kubernetes/scheduler.yaml"
             - name: "etc-kube-ssl"
               hostPath:
                 path: "/etc/kubernetes/ssl"
     - filesystem: "root"
-      path: "/etc/kubernetes/ssl/sa-{{ clustername }}-k8s-key.pem"
+      path: "/tmp/remote-etcd-ca.pem"
       mode: 0664
       contents:
-        local: "sa-{{ clustername }}-k8s-key.pem"
+        local: "../remote-etcd-ca.pem"
     - filesystem: "root"
-      path: "/etc/kubernetes/ssl/sa-{{ clustername }}-k8s.pem"
+      path: "/tmp/remote-etcd-client-crt.pem"
       mode: 0664
       contents:
-        local: "sa-{{ clustername }}-k8s.pem"
+        local: "../remote-etcd-client-crt.pem"
     - filesystem: "root"
-      path: "/etc/kubernetes/ssl/front-proxy-client-key.pem"
+      path: "/tmp/remote-etcd-client-key.pem"
       mode: 0664
       contents:
-        local: "front-proxy-client-key.pem"
-    - filesystem: "root"
-      path: "/etc/kubernetes/ssl/front-proxy-client.pem"
-      mode: 0664
-      contents:
-        local: "front-proxy-client.pem"
-    - filesystem: "root"
-      path: "/etc/kubernetes/ssl/front-proxy-client-ca.pem"
-      mode: 0664
-      contents:
-        local: "front-proxy-client-ca.pem"
+        local: "../remote-etcd-client-key.pem"
 {% endif %}

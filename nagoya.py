@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.26"
+__version__ = "0.3.28"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -68,9 +68,9 @@ parser.add_argument("--workerimageflavor", help="Worker image flavor ID - (2008)
 parser.add_argument("--glanceimagename", help="Glance image name ID - (Container Linux CoreOS (third-party))", default="Container Linux CoreOS (third-party)")
 parser.add_argument("--dnsserver", help="DNS server - (8.8.8.8)", default="8.8.8.8")
 parser.add_argument("--cloudprovider", help="Cloud provider support - (openstack)", choices=['openstack', 'external'], default="openstack")
-parser.add_argument("--k8sver", help="Hyperkube version - (v1.12.1)", default="v1.12.1")
-parser.add_argument("--etcdver", help="ETCD version - (3.3.9)", default="3.3.9")
-parser.add_argument("--flannelver", help="Flannel image version - (0.10.0)", default="0.10.0")
+parser.add_argument("--k8sver", help="Hyperkube version - (v1.14.0)", default="v1.14.0")
+parser.add_argument("--etcdver", help="ETCD version - (3.3.13)", default="3.3.13")
+parser.add_argument("--flannelver", help="Flannel image version - (0.11.0)", default="0.11.0")
 parser.add_argument("--netoverlay", help="Network overlay - (flannel)", choices=['flannel', 'calico'], default="flannel")
 parser.add_argument("--rbac", help="RBAC mode - (false)", choices=['true', 'false'], default="false")
 parser.add_argument("--apidebuglevel", help="Api DebugLevel - (1)", type=int, choices=range(1, 11), default=1)
@@ -78,6 +78,7 @@ parser.add_argument("--proxymode", help="Proxymode - (iptables)", choices=['ipvs
 parser.add_argument("--alphafeatures", help="enable alpha feature - (false)", choices=['true', 'false'], default="false")
 parser.add_argument("--availabilityzone", help="Availability zone - (AMS-EQ1)", default="AMS-EQ1")
 parser.add_argument("--externalnetid", help="External network id - (f9c73cd5-9e7b-4bfd-89eb-c2f4f584c326)", default="f9c73cd5-9e7b-4bfd-89eb-c2f4f584c326")
+parser.add_argument("--remoteetcd", help="Remote ETCD server", default="https://83.96.176.30:2379")
 args = parser.parse_args()
 
 template = TEMPLATE_ENVIRONMENT.get_template('./templates/k8s.tf.tmpl')
@@ -136,6 +137,25 @@ try:
                 ipaddress=nodeip,
                 loadbalancer=(args.subnetcidr).rsplit('.', 1)[0] + ".3"
             ))
+
+            """Creating Scheduler certificate"""
+            nodeoctet = nodeip.rsplit('.')[3]
+            subprocess.call(["openssl", "genrsa", "-out", nodeip + "-k8s-kube-scheduler-key.pem", "2048"], cwd='./tls')
+            subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-k8s-kube-scheduler-key.pem", "-out", nodeip + "-k8s-kube-scheduler.csr", "-subj", "/CN=system:kube-scheduler/O=system:kube-scheduler", "-config", "openssl.cnf"], cwd='./tls')
+            subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-kube-scheduler.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-kube-scheduler.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+
+            """Creating Controller Manager certificate"""
+            nodeoctet = nodeip.rsplit('.')[3]
+            subprocess.call(["openssl", "genrsa", "-out", nodeip + "-k8s-kube-cm-key.pem", "2048"], cwd='./tls')
+            subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-k8s-kube-cm-key.pem", "-out", nodeip + "-k8s-kube-cm.csr", "-subj", "/CN=system:kube-controller-manager/O=system:kube-controller-manager", "-config", "openssl.cnf"], cwd='./tls')
+            subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-kube-cm.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-kube-cm.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+
+            """Creating kubelet client-certificate"""
+            nodeoctet = nodeip.rsplit('.')[3]
+            subprocess.call(["openssl", "genrsa", "-out", nodeip + "-k8s-kubelet-client-key.pem", "2048"], cwd='./tls')
+            subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-k8s-kubelet-client-key.pem", "-out", nodeip + "-k8s-kubelet-client.csr", "-subj", "/CN=kubelet-api-client" + "/O=system:masters", "-config", "openssl.cnf"], cwd='./tls')
+            subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-kubelet-client.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-kubelet-client.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+
         else:
             openssltemplate = (opensslworker_template.render(
                 ipaddress=nodeip,
@@ -153,6 +173,10 @@ try:
         subprocess.call(["openssl", "genrsa", "-out", nodeip + "-etcd-node-key.pem", "2048"], cwd='./tls')
         subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-etcd-node-key.pem", "-out", nodeip + "-etcd-node.csr", "-subj", "/CN=" + nodeip + "-etcd-node", "-config", "openssl.cnf"], cwd='./tls')
         subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-etcd-node.csr", "-CA", "etcd-ca.pem", "-CAkey", "etcd-ca-key.pem", "-CAcreateserial", "-out", nodeip + "-etcd-node.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+
+        subprocess.call(["openssl", "genrsa", "-out", nodeip + "-k8s-kube-proxy-key.pem", "2048"], cwd='./tls')
+        subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-k8s-kube-proxy-key.pem", "-out", nodeip + "-k8s-kube-proxy.csr", "-subj", "/CN=system:kube-proxy" + "/O=system:node-proxier", "-config", "openssl.cnf"], cwd='./tls')
+        subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-kube-proxy.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-kube-proxy.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
     def createClientCert(user):
         """Create Client certificates."""
@@ -220,6 +244,15 @@ try:
             randomsalt += random.choice(choices)
         cryptedPass = crypt.crypt(password, '$6$%s$' % randomsalt)
 
+    def generateClusterID():
+        """Generate clusterID."""
+        randomsalt = ""
+        global clusterID
+        clusterID = ""
+        choices = string.ascii_uppercase + string.digits + string.ascii_lowercase
+        for _ in range(0, 12):
+            clusterID += random.choice(choices)
+
     def generateRandomString():
         """Generate a random String."""
         rndstring = ""
@@ -227,6 +260,10 @@ try:
         for _ in range(0, 10):
             rndstring += random.choice(choices)
         return rndstring
+
+    def createCertificateTarball(nodeip):
+        """Create tarball with PKI material"""
+        subprocess.Popen("cd tls; tar -czf ../" + (clusterID) + "-node_" + (nodeip) + ".tgz " + (nodeip) + "-k8s-*.pem", shell=True, stdout=subprocess.PIPE)
 
     def returnPublicKey():
         """Retrieve rsa-ssh public key from OpenStack."""
@@ -240,10 +277,40 @@ try:
         defaultsecuritygroupid = subprocess.Popen("openstack security group list -f value -c ID -c Name | grep default", shell=True, stdout=subprocess.PIPE).stdout.read().split(" ")[0]
         return defaultsecuritygroupid
 
+    def initCertsOnEtcd(nodeip, clusterID, clustername, remoteetcd, action):
+        """Publish certificates on remote etcd"""
+        pkilist = [nodeip + "-k8s-kube-cm-key.pem",
+                   nodeip + "-k8s-kube-cm.pem",
+                   nodeip + "-k8s-kube-proxy-key.pem",
+                   nodeip + "-k8s-kube-proxy.pem",
+                   nodeip + "-k8s-kube-scheduler-key.pem",
+                   nodeip + "-k8s-kube-scheduler.pem",
+                   nodeip + "-k8s-kubelet-client-key.pem",
+                   nodeip + "-k8s-kubelet-client.pem",
+                   nodeip + "-k8s-node-key.pem",
+                   nodeip + "-k8s-node.pem",
+                   "sa-" + clustername + "-k8s-key.pem",
+                   "sa-" + clustername + "-k8s.pem",
+                   "front-proxy-client.pem",
+                   "front-proxy-client-key.pem",
+                   "front-proxy-client-ca.pem",
+                   "front-proxy-client-ca-key.pem"
+                   ]
+        for x in pkilist:
+            my_env = os.environ.copy()
+            my_env["ETCDCTL_API"] = "3"
+            if "push" in action:
+                pushcmd = ("cat ./tls/" + (x) + " | etcdctl --endpoints=" + (remoteetcd) + " --cacert=./remote-etcd-ca.pem --cert=./remote-etcd-client-crt.pem --key=./remote-etcd-client-key.pem put " + (clusterID) + "_" + (x))
+                subprocess.Popen(pushcmd, env=my_env, shell=True)
+            if "deploy" in action:
+                deploycmd = ("etcdctl --endpoints=" + (remoteetcd) + " --cacert=./remote-etcd-ca.pem --cert=./remote-etcd-client-crt.pem --key=./remote-etcd-client-key.pem --print-value-only=true get " + (clusterID) + "_" + (x) + " > /etc/kubernetes/ssl/" + (x))
+                subprocess.Popen(deploycmd, env=my_env, shell=True)
+
     def printClusterInfo():
         """Print cluster info."""
         print("-" * 40 + "\n\nCluster Info:")
         print("Core password:\t" + str(password))
+        print("ClusterID:\t" + str(clusterID))
         print("Keypair:\t" + str(rsakey))
         print("k8s version:\t" + str(args.k8sver))
         print("ETCD vers:\t" + str(args.etcdver))
@@ -323,6 +390,8 @@ try:
     createFrontProxyCert()
     # Create core user passowrd
     generatePassword()
+    # Create clusterID
+    generateClusterID()
     returnPublicKey()
     returnDefaultSecurityGroupId()
     etcdtoken = generateRandomString()
@@ -392,6 +461,7 @@ try:
         lanip = str(args.subnetcidr.rsplit('.', 1)[0] + "." + str(node))
         nodeyaml = str("node_" + lanip.rstrip(' ') + ".yaml")
         createNodeCert(lanip, "manager")
+        initCertsOnEtcd(lanip, clusterID, args.clustername, args.remoteetcd, "push")
 
         manager_template = (cloudconf_template.render(
             node=node,
@@ -418,7 +488,9 @@ try:
             ipaddress=lanip,
             ipaddressgw=(args.subnetcidr).rsplit('.', 1)[0] + ".1",
             alphafeatures=args.alphafeatures,
-            proxymode=args.proxymode
+            proxymode=args.proxymode,
+            clusterid=clusterID,
+            remoteetcd=args.remoteetcd
         ))
 
         with open(nodeyaml, 'w') as controller:
