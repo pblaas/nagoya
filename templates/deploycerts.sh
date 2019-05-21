@@ -33,9 +33,14 @@ pkilist=($nodeip"-k8s-kube-cm.pem"
          "front-proxy-client-ca.pem"
          "front-proxy-client-ca-key.pem"
          )
-for i in "${pkilist[@]}"; do 
-  ETCDCTL_API=3  /bin/etcdctl --endpoints=$remoteetcd --cacert=/etc/kubernetes/ssl/remote-etcd-ca.pem --cert=/etc/kubernetes/ssl/remote-etcd-client-crt.pem --key=/etc/kubernetes/ssl/remote-etcd-client-key.pem \
-  --print-value-only=true get ${clusterid}_${i} > /etc/kubernetes/ssl/$i
+for i in "${pkilist[@]}"; do
+  #check if key is available on the etcd datastore. Only overwrite with new value if we can find it.
+  testkey=$(ETCDCTL_API=3  /bin/etcdctl --endpoints=$remoteetcd --cacert=/etc/kubernetes/ssl/remote-etcd-ca.pem --cert=/etc/kubernetes/ssl/remote-etcd-client-crt.pem --key=/etc/kubernetes/ssl/remote-etcd-client-key.pem \
+  --keys-only get ${clusterid}_${i})
+  if [ "${testkey}" == "${clusterid}_${i}" ]; then
+    ETCDCTL_API=3  /bin/etcdctl --endpoints=$remoteetcd --cacert=/etc/kubernetes/ssl/remote-etcd-ca.pem --cert=/etc/kubernetes/ssl/remote-etcd-client-crt.pem --key=/etc/kubernetes/ssl/remote-etcd-client-key.pem \
+    --print-value-only=true get ${clusterid}_${i} > /etc/kubernetes/ssl/$i
+  fi
   #removing service to prevent overwriting ssl file will 0 byte content.
   ##rm /etc/systemd/system/deploy_controlplane_certs.service
 done
