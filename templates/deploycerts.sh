@@ -36,5 +36,7 @@ pkilist=($nodeip"-k8s-kube-cm.pem"
 for i in "${pkilist[@]}"; do 
   ETCDCTL_API=3  /bin/etcdctl --endpoints=$remoteetcd --cacert=/etc/kubernetes/ssl/remote-etcd-ca.pem --cert=/etc/kubernetes/ssl/remote-etcd-client-crt.pem --key=/etc/kubernetes/ssl/remote-etcd-client-key.pem \
   --print-value-only=true get ${clusterid}_${i} > /etc/kubernetes/ssl/$i
+  #removing service to prevent overwriting ssl file will 0 byte content.
+  ##rm /etc/systemd/system/deploy_controlplane_certs.service
 done
 
