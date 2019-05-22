@@ -337,7 +337,9 @@ try:
 
     def initCertsOnEtcd(nodeip, clusterID, clustername, remoteetcd, action):
         """Publish certificates on remote etcd"""
-        pkilist = [nodeip + "-k8s-kube-cm-key.pem",
+        pkilist = [nodeip + "-etcd-node-key.pem",
+                   nodeip + "-etcd-node.pem",
+                   nodeip + "-k8s-kube-cm-key.pem",
                    nodeip + "-k8s-kube-cm.pem",
                    nodeip + "-k8s-kube-proxy-key.pem",
                    nodeip + "-k8s-kube-proxy.pem",
@@ -352,7 +354,8 @@ try:
                    "front-proxy-client.pem",
                    "front-proxy-client-key.pem",
                    "front-proxy-client-ca.pem",
-                   "front-proxy-client-ca-key.pem"
+                   "ca.pem",
+                   "etcd-ca.pem"
                    ]
         for x in pkilist:
             my_env = os.environ.copy()
@@ -369,6 +372,7 @@ try:
         print("-" * 40 + "\n\nCluster Info:")
         print("Core password:\t" + str(password))
         print("ClusterID:\t" + str(clusterID))
+        print("Remote etcd:\t" + str(args.remoteetcd))
         print("Keypair:\t" + str(rsakey))
         print("k8s version:\t" + str(args.k8sver))
         print("ETCD vers:\t" + str(args.etcdver))
@@ -422,7 +426,9 @@ try:
             externalnetid=args.externalnetid,
             apidebuglevel=args.apidebuglevel,
             defaultsecuritygroupid=defaultsecuritygroupid,
-            proxymode=args.proxymode
+            proxymode=args.proxymode,
+            clusterid=clusterID,
+            remoteetcd=args.remoteetcd
         ))
 
         with open('cluster.status', 'w') as k8sstat:
@@ -585,7 +591,9 @@ try:
             ipaddress=lanip,
             ipaddressgw=(args.subnetcidr).rsplit('.', 1)[0] + ".1",
             loadbalancer=(args.subnetcidr).rsplit('.', 1)[0] + ".3",
-            proxymode=args.proxymode
+            proxymode=args.proxymode,
+            clusterid=clusterID,
+            remoteetcd=args.remoteetcd
         ))
 
         with open(nodeyaml, 'w') as worker:

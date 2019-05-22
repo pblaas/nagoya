@@ -15,9 +15,10 @@ remoteetcd=$4
 action=$5
 
 declare -a pkilist
-pkilist=($nodeip"-k8s-kube-cm.pem"
+pkilist=($nodeip"-etcd-node-key.pem"
+         $nodeip"-etcd-node.pem"
+         $nodeip"-k8s-kube-cm.pem"
          $nodeip"-k8s-kube-cm-key.pem"
-         $nodeip"-k8s-kube-proxy-key.pem"
          $nodeip"-k8s-kube-proxy-key.pem"
          $nodeip"-k8s-kube-proxy.pem"
          $nodeip"-k8s-kube-scheduler-key.pem"
@@ -31,7 +32,8 @@ pkilist=($nodeip"-k8s-kube-cm.pem"
          "front-proxy-client.pem"
          "front-proxy-client-key.pem"
          "front-proxy-client-ca.pem"
-         "front-proxy-client-ca-key.pem"
+         "ca.pem"
+         "etcd-ca.pem"
          )
 for i in "${pkilist[@]}"; do
   #check if key is available on the etcd datastore. Only overwrite with new value if we can find it.

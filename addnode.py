@@ -9,7 +9,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.0.10"
+__version__ = "0.0.11"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -45,6 +45,7 @@ cloudconf_template = TEMPLATE_ENVIRONMENT.get_template('./templates/k8scloudconf
 opensslmanager_template = TEMPLATE_ENVIRONMENT.get_template('./tls/openssl.cnf.tmpl')
 additional_node_template = TEMPLATE_ENVIRONMENT.get_template('./templates/additional_node.tf.tmpl')
 opensslworker_template = TEMPLATE_ENVIRONMENT.get_template('./tls/openssl-worker.cnf.tmpl')
+etcd_openssl_template = TEMPLATE_ENVIRONMENT.get_template('./tls/etcd_openssl.cnf.tmpl')
 
 try:
     # Create node certificates
@@ -71,14 +72,22 @@ try:
         subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-k8s-node-key.pem", "-out", nodeip + "-k8s-node.csr", "-subj", "/CN=system:node:k8s-" + str(clustername) + "-node" + str(nodeoctet) + "/O=system:nodes", "-config", "openssl.cnf"], cwd='./tls')
         subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-node.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-node.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
+        subprocess.call(["openssl", "genrsa", "-out", nodeip + "-k8s-kube-proxy-key.pem", "2048"], cwd='./tls')
+        subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-k8s-kube-proxy-key.pem", "-out", nodeip + "-k8s-kube-proxy.csr", "-subj", "/CN=system:kube-proxy" + "/O=system:node-proxier", "-config", "openssl.cnf"], cwd='./tls')
+        subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-kube-proxy.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-kube-proxy.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
+
+        openssltemplate = (etcd_openssl_template.render(
+            ipaddress=nodeip,
+            loadbalancer=(args.subnetcidr).rsplit('.', 1)[0] + ".3"
+        ))
+
+        with open('./tls/openssl.cnf', 'w') as openssl:
+            openssl.write(openssltemplate)
+
         # ${i}-etcd-worker.pem
         subprocess.call(["openssl", "genrsa", "-out", nodeip + "-etcd-node-key.pem", "2048"], cwd='./tls')
         subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-etcd-node-key.pem", "-out", nodeip + "-etcd-node.csr", "-subj", "/CN=" + nodeip + "-etcd-node", "-config", "openssl.cnf"], cwd='./tls')
         subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-etcd-node.csr", "-CA", "etcd-ca.pem", "-CAkey", "etcd-ca-key.pem", "-CAcreateserial", "-out", nodeip + "-etcd-node.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
-
-        subprocess.call(["openssl", "genrsa", "-out", nodeip + "-k8s-kube-proxy-key.pem", "2048"], cwd='./tls')
-        subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-k8s-kube-proxy-key.pem", "-out", nodeip + "-k8s-kube-proxy.csr", "-subj", "/CN=system:kube-proxy" + "/O=system:node-proxier", "-config", "openssl.cnf"], cwd='./tls')
-        subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-k8s-kube-proxy.csr", "-CA", "ca.pem", "-CAkey", "ca-key.pem", "-CAcreateserial", "-out", nodeip + "-k8s-kube-proxy.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
     def configTranspiler(nodeip):
         """Create json file from yaml content."""
@@ -123,6 +132,8 @@ try:
             apidebuglevel = str(fh[23].split("\t")[1])[:-1]
             defaultsecuritygroupid = str(fh[24].split("\t")[1])[:-1]
             proxymode = str(fh[25].split("\t")[1])[:-1]
+            clusterid = str(fh[26].split("\t")[1])[:-1]
+            remoteetcd = str(fh[27].split("\t")[1])[:-1]
 
             createNodeCert(lanip, "worker")
             worker_template = (cloudconf_template.render(
@@ -147,7 +158,9 @@ try:
                 cryptedPass=cryptedPass,
                 sshkey=sshkey,
                 apidebuglevel=apidebuglevel,
-                proxymode=proxymode
+                proxymode=proxymode,
+                clusterid=clusterID,
+                remoteetcd=remoteetcd
             ))
 
             with open(nodeyaml, 'w') as worker:
