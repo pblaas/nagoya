@@ -1,3 +1,4 @@
+{% if isworker != 1 %}
 etcd:
   version:                     "{{ etcdver }}"
   advertise_client_urls:       "https://{{ ipaddress }}:2379"
@@ -5,11 +6,9 @@ etcd:
   listen_client_urls:          "http://127.0.0.1:2379,https://{{ ipaddress }}:2379"
   listen_peer_urls:            "https://{{ ipaddress }}:2380"
   name:                        "infra{{ etcdid }}"
-{% if isworker != 1 %}
   initial_cluster:             "{{ initialclusterlist }}"
   initial_cluster_token:       "etcd-cluster-{{ etcdtoken }}"
   initial_cluster_state:       "new"
-{% endif %}
   cert_file:                   "/etc/ssl/certs/{{ ipaddress }}-etcd-node.pem"
   key_file:                    "/etc/ssl/certs/{{ ipaddress }}-etcd-node-key.pem"
   trusted_ca_file:             "/etc/ssl/certs/etcd-ca.pem"
@@ -18,8 +17,6 @@ etcd:
   peer_key_file:               "/etc/ssl/certs/{{ ipaddress }}-etcd-node-key.pem"
   peer_trusted_ca_file:        "/etc/ssl/certs/etcd-ca.pem"
   peer_client_cert_auth:       true
-{% if isworker == 1 %}
-  proxy: on
 {% endif %}
 
 networkd:
