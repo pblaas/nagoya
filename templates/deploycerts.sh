@@ -41,6 +41,9 @@ for i in "${pkilist[@]}"; do
   #echo testkey: $testkey
   if [ "${testkey}" == "${clusterid}_${i}" ]; then
     ETCDCTL_API=3  /bin/etcdctl --endpoints=${remoteetcd} --cacert=/etc/kubernetes/ssl/remote-etcd-ca.pem --cert=/etc/kubernetes/ssl/remote-etcd-client-crt.pem --key=/etc/kubernetes/ssl/remote-etcd-client-key.pem    --print-value-only=true get ${clusterid}_${i} > /etc/kubernetes/ssl/$i
+    if [[ "${testkey}" =~ "etcd" ]]; then
+      ETCDCTL_API=3  /bin/etcdctl --endpoints=${remoteetcd} --cacert=/etc/kubernetes/ssl/remote-etcd-ca.pem --cert=/etc/kubernetes/ssl/remote-etcd-client-crt.pem --key=/etc/kubernetes/ssl/remote-etcd-client-key.pem    --print-value-only=true get ${clusterid}_${i} > /etc/ssl/certs/$i
+    fi
   fi
 
 done

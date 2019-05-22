@@ -332,7 +332,6 @@ storage:
       mode: 0664
       contents:
         local: "{{ ipaddress }}-k8s-kube-proxy.pem"
-{% endif %}
     - filesystem: "root"
       path: "/etc/kubernetes/ssl/ca.pem"
       mode: 0664
@@ -368,6 +367,7 @@ storage:
       mode: 0664
       contents:
         local: "etcd-ca.pem"
+{% endif %}
     - filesystem: "root"
       path: "/etc/kubernetes/cloud.conf"
       mode: 0664
