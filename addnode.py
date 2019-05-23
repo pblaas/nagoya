@@ -11,7 +11,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.0.12"
+__version__ = "0.0.13"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -157,7 +157,7 @@ try:
             remoteetcd = str(fh[27].split("\t")[1])[:-1]
 
             createNodeCert(lanip, "worker")
-            initCertsOnEtcd(lanip, clusterID, clustername, remoteetcd, "push")
+            initCertsOnEtcd(lanip, clusterid, clustername, remoteetcd, "push")
 
             worker_template = (cloudconf_template.render(
                 node=lanip.rsplit('.', 1)[1],
