@@ -316,6 +316,7 @@ storage:
               "hairpinMode": true
             }
           }
+{% if isworker != 1 %}
     - filesystem: "root"
       path: "/home/core/etcdinfo.sh"
       mode: 0665
