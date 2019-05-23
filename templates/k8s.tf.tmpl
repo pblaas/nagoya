@@ -276,7 +276,7 @@ resource "openstack_lb_monitor_v2" "{{ clustername }}_monitor_1" {
   type        = "PING"
   delay       = 20
   timeout     = 10
-  max_retries = 5
+  max_retries = 50
 }
 
 resource "openstack_lb_loadbalancer_v2" "{{ clustername }}_lb_1" {
@@ -322,7 +322,7 @@ resource "openstack_lb_monitor_v2" "{{ clustername }}_monitor_2" {
   type        = "PING"
   delay       = 20
   timeout     = 10
-  max_retries = 5
+  max_retries = 50
 }
 
 resource "openstack_lb_loadbalancer_v2" "{{ clustername }}_lb_2" {
