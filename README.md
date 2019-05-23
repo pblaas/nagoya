@@ -4,7 +4,7 @@ Deploy scripts to produce Container Linux config files and Terraform files to bo
 Since kubernetes v1.14 the nagoya scripts use additional PKI for segregation of permissions in combination with RBAC.
 This change led to much bigger ignition files which are loaded with CoreOS as user-data in the boot stage. The igition files on the masters exceeded 65k bytes which prevented CoreOS to load this data on boot due to OpenStack limits and forced me to provide another solution to bootstrap a fresh cluster.
 
-To mitigate this issue as of nagoya scripts v1.14 a seperate ETCD system is required. This ETCD system will be used to store the PKI infrastructure which in turn will be read again by CoreOS on boot and placed in the proper locations.
+To mitigate this issue as of nagoya scripts which support kubernetes v1.14 a seperate ETCD system is required. This ETCD system will be used to store the PKI infrastructure which in turn will be read again by CoreOS on boot and placed in the proper locations.
 
 Benefit of this system is the renewal of the PKI infrastructure can be staged on the remote ETCD server and will automaticly be picked up after the nodes are rebooted.
 
