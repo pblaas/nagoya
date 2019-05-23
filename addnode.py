@@ -3,6 +3,8 @@
 
 import argparse
 import os
+import os.path
+import sys
 import subprocess
 import base64
 from jinja2 import Environment, FileSystemLoader
@@ -31,6 +33,12 @@ if "OS_REGION_NAME" not in os.environ:
     os.environ["OS_REGION_NAME"] = "Default"
 if "OS_AUTH_URL" not in os.environ:
     os.environ["OS_AUTH_URL"] = "Default"
+
+remotecrtlist = ["./remote-etcd-ca.pem", "./remote-etcd-client-crt.pem", "./remote-etcd-client-key.pem"]
+for x in remotecrtlist:
+    if (not os.path.isfile(x)) and (not os.access(x, os.R_OK)):
+        print "Either the file(" + x + ") is missing or not readable. Unable to continue."
+        sys.exit(1)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("ipaddress", help="node ip address")
@@ -89,6 +97,27 @@ try:
         subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-etcd-node-key.pem", "-out", nodeip + "-etcd-node.csr", "-subj", "/CN=" + nodeip + "-etcd-node", "-config", "openssl.cnf"], cwd='./tls')
         subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-etcd-node.csr", "-CA", "etcd-ca.pem", "-CAkey", "etcd-ca-key.pem", "-CAcreateserial", "-out", nodeip + "-etcd-node.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
+    def initCertsOnEtcd(nodeip, clusterID, clustername, remoteetcd, action):
+        """Publish certificates on remote etcd"""
+
+        pkilist = [nodeip + "-etcd-node-key.pem",
+                   nodeip + "-etcd-node.pem",
+                   nodeip + "-k8s-kube-proxy-key.pem",
+                   nodeip + "-k8s-kube-proxy.pem",
+                   nodeip + "-k8s-node-key.pem",
+                   nodeip + "-k8s-node.pem",
+                   ]
+
+        for x in pkilist:
+            my_env = os.environ.copy()
+            my_env["ETCDCTL_API"] = "3"
+            if "push" in action:
+                pushcmd = ("cat ./tls/" + (x) + " | etcdctl --endpoints=" + (remoteetcd) + " --cacert=./remote-etcd-ca.pem --cert=./remote-etcd-client-crt.pem --key=./remote-etcd-client-key.pem put " + (clusterID) + "_" + (x))
+                subprocess.Popen(pushcmd, env=my_env, shell=True)
+            if "deploy" in action:
+                deploycmd = ("etcdctl --endpoints=" + (remoteetcd) + " --cacert=./remote-etcd-ca.pem --cert=./remote-etcd-client-crt.pem --key=./remote-etcd-client-key.pem --print-value-only=true get " + (clusterID) + "_" + (x) + " > /etc/kubernetes/ssl/" + (x))
+                subprocess.Popen(deploycmd, env=my_env, shell=True)
+
     def configTranspiler(nodeip):
         """Create json file from yaml content."""
         subprocess.call(["./ct", "-files-dir=tls", "-in-file", "node_" + nodeip + ".yaml", "-out-file", "node_" + nodeip + ".json", "-pretty"])
@@ -136,6 +165,8 @@ try:
             remoteetcd = str(fh[27].split("\t")[1])[:-1]
 
             createNodeCert(lanip, "worker")
+            initCertsOnEtcd(lanip, clusterID, clustername, remoteetcd, "push")
+
             worker_template = (cloudconf_template.render(
                 node=lanip.rsplit('.', 1)[1],
                 isworker=1,
