@@ -335,28 +335,40 @@ try:
         defaultsecuritygroupid = subprocess.Popen("openstack security group list -f value -c ID -c Name | grep default", shell=True, stdout=subprocess.PIPE).stdout.read().split(" ")[0]
         return defaultsecuritygroupid
 
-    def initCertsOnEtcd(nodeip, clusterID, clustername, remoteetcd, action):
+    def initCertsOnEtcd(nodeip, clusterID, clustername, remoteetcd, action, role):
         """Publish certificates on remote etcd"""
-        pkilist = [nodeip + "-etcd-node-key.pem",
-                   nodeip + "-etcd-node.pem",
-                   nodeip + "-k8s-kube-cm-key.pem",
-                   nodeip + "-k8s-kube-cm.pem",
-                   nodeip + "-k8s-kube-proxy-key.pem",
-                   nodeip + "-k8s-kube-proxy.pem",
-                   nodeip + "-k8s-kube-scheduler-key.pem",
-                   nodeip + "-k8s-kube-scheduler.pem",
-                   nodeip + "-k8s-kubelet-client-key.pem",
-                   nodeip + "-k8s-kubelet-client.pem",
-                   nodeip + "-k8s-node-key.pem",
-                   nodeip + "-k8s-node.pem",
-                   "sa-" + clustername + "-k8s-key.pem",
-                   "sa-" + clustername + "-k8s.pem",
-                   "front-proxy-client.pem",
-                   "front-proxy-client-key.pem",
-                   "front-proxy-client-ca.pem",
-                   "ca.pem",
-                   "etcd-ca.pem"
-                   ]
+        pkglist = []
+
+        if "master" in role:
+            pkilist = [nodeip + "-etcd-node-key.pem",
+                       nodeip + "-etcd-node.pem",
+                       nodeip + "-k8s-kube-cm-key.pem",
+                       nodeip + "-k8s-kube-cm.pem",
+                       nodeip + "-k8s-kube-proxy-key.pem",
+                       nodeip + "-k8s-kube-proxy.pem",
+                       nodeip + "-k8s-kube-scheduler-key.pem",
+                       nodeip + "-k8s-kube-scheduler.pem",
+                       nodeip + "-k8s-kubelet-client-key.pem",
+                       nodeip + "-k8s-kubelet-client.pem",
+                       nodeip + "-k8s-node-key.pem",
+                       nodeip + "-k8s-node.pem",
+                       "sa-" + clustername + "-k8s-key.pem",
+                       "sa-" + clustername + "-k8s.pem",
+                       "front-proxy-client.pem",
+                       "front-proxy-client-key.pem",
+                       "front-proxy-client-ca.pem",
+                       "ca.pem",
+                       "etcd-ca.pem"
+                       ]
+        else:
+            pkilist = [nodeip + "-etcd-node-key.pem",
+                       nodeip + "-etcd-node.pem",
+                       nodeip + "-k8s-kube-proxy-key.pem",
+                       nodeip + "-k8s-kube-proxy.pem",
+                       nodeip + "-k8s-node-key.pem",
+                       nodeip + "-k8s-node.pem",
+                       ]
+
         for x in pkilist:
             my_env = os.environ.copy()
             my_env["ETCDCTL_API"] = "3"
@@ -525,7 +537,7 @@ try:
         lanip = str(args.subnetcidr.rsplit('.', 1)[0] + "." + str(node))
         nodeyaml = str("node_" + lanip.rstrip(' ') + ".yaml")
         createNodeCert(lanip, "manager")
-        initCertsOnEtcd(lanip, clusterID, args.clustername, args.remoteetcd, "push")
+        initCertsOnEtcd(lanip, clusterID, args.clustername, args.remoteetcd, "push", "master")
 
         manager_template = (cloudconf_template.render(
             node=node,
@@ -564,6 +576,7 @@ try:
         lanip = str(args.subnetcidr.rsplit('.', 1)[0] + "." + str(node))
         nodeyaml = str("node_" + lanip.rstrip(' ') + ".yaml")
         createNodeCert(lanip, "worker")
+        initCertsOnEtcd(lanip, clusterID, args.clustername, args.remoteetcd, "push", "worker")
 
         worker_template = (cloudconf_template.render(
             node=node,

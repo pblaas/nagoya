@@ -75,13 +75,24 @@ systemd:
         [Unit]
         Description=Deploy Controlplane certs from remote ETCD
         [Service]
-        ExecStart=/bin/sh -c "/home/core/deploycerts.sh {{ ipaddress }} {{ clusterid }} {{ clustername }} {{ remoteetcd }} deploy"
+        ExecStart=/bin/sh -c "/home/core/deploycerts.sh {{ ipaddress }} {{ clusterid }} {{ clustername }} {{ remoteetcd }} deploy master"
         RemainAfterExit=yes
         Type=oneshot
         [Install]
         WantedBy=multi-user.target
 {% endif %}
 {% if isworker == 1 %}
+    - name: deploy_controlplane_certs.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Deploy Controlplane certs from remote ETCD
+        [Service]
+        ExecStart=/bin/sh -c "/home/core/deploycerts.sh {{ ipaddress }} {{ clusterid }} {{ clustername }} {{ remoteetcd }} deploy worker"
+        RemainAfterExit=yes
+        Type=oneshot
+        [Install]
+        WantedBy=multi-user.target
     - name: vm.max_map_count.service
       enabled: true
       contents: |
@@ -311,62 +322,6 @@ storage:
       contents:
         inline: |
           /usr/bin/etcdctl --cert-file=/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node.pem --key-file=/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node-key.pem --ca-file=/etc/kubernetes/ssl/etcd-ca.pem  cluster-health
-{% if isworker == 1 %}
-    - filesystem: "root"
-      path: "/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node-key.pem"
-      mode: 0664
-      contents:
-        local: "{{ ipaddress }}-k8s-node-key.pem"
-    - filesystem: "root"
-      path: "/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node.pem"
-      mode: 0664
-      contents:
-        local: "{{ ipaddress }}-k8s-node.pem"
-    - filesystem: "root"
-      path: "/etc/kubernetes/ssl/{{ ipaddress }}-k8s-kube-proxy-key.pem"
-      mode: 0664
-      contents:
-        local: "{{ ipaddress }}-k8s-kube-proxy-key.pem"
-    - filesystem: "root"
-      path: "/etc/kubernetes/ssl/{{ ipaddress }}-k8s-kube-proxy.pem"
-      mode: 0664
-      contents:
-        local: "{{ ipaddress }}-k8s-kube-proxy.pem"
-    - filesystem: "root"
-      path: "/etc/kubernetes/ssl/ca.pem"
-      mode: 0664
-      contents:
-        local: "ca.pem"
-    - filesystem: "root"
-      path: "/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node-key.pem"
-      mode: 0664
-      contents:
-        local: "{{ ipaddress }}-etcd-node-key.pem"
-    - filesystem: "root"
-      path: "/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node.pem"
-      mode: 0664
-      contents:
-        local: "{{ ipaddress }}-etcd-node.pem"
-    - filesystem: "root"
-      path: "/etc/kubernetes/ssl/etcd-ca.pem"
-      mode: 0664
-      contents:
-        local: "etcd-ca.pem"
-    - filesystem: "root"
-      path: "/etc/ssl/certs/{{ ipaddress }}-etcd-node-key.pem"
-      mode: 0664
-      contents:
-        local: "{{ ipaddress }}-etcd-node-key.pem"
-    - filesystem: "root"
-      path: "/etc/ssl/certs/{{ ipaddress }}-etcd-node.pem"
-      mode: 0664
-      contents:
-        local: "{{ ipaddress }}-etcd-node.pem"
-    - filesystem: "root"
-      path: "/etc/ssl/certs/etcd-ca.pem"
-      mode: 0664
-      contents:
-        local: "etcd-ca.pem"
 {% endif %}
     - filesystem: "root"
       path: "/etc/kubernetes/cloud.conf"
@@ -765,6 +720,13 @@ storage:
       mode: 0664
       contents:
         local: "../remote-etcd-client-key.pem"
+    - filesystem: "root"
+      path: "/home/core/deploycerts.sh"
+      mode: 0751
+      contents:
+        local: "../templates/deploycerts.sh"
+{% endif %}
+{% if isworker == 1 %}
     - filesystem: "root"
       path: "/home/core/deploycerts.sh"
       mode: 0751
