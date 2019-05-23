@@ -11,7 +11,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.0.11"
+__version__ = "0.0.12"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -60,17 +60,9 @@ try:
     def createNodeCert(nodeip, k8srole):
         """Create Node certificates."""
         print("received: " + nodeip)
-        if k8srole == "manager":
-            openssltemplate = (opensslmanager_template.render(
-                floatingip1=args.floatingip1,
-                ipaddress=nodeip,
-                loadbalancer=(args.subnetcidr).rsplit('.', 1)[0] + ".3"
-            ))
-
-        else:
-            openssltemplate = (opensslworker_template.render(
-                ipaddress=nodeip,
-            ))
+        openssltemplate = (opensslworker_template.render(
+            ipaddress=nodeip,
+        ))
 
         with open('./tls/openssl.cnf', 'w') as openssl:
             openssl.write(openssltemplate)
@@ -86,7 +78,7 @@ try:
 
         openssltemplate = (etcd_openssl_template.render(
             ipaddress=nodeip,
-            loadbalancer=(args.subnetcidr).rsplit('.', 1)[0] + ".3"
+            loadbalancer=(subnetcidr).rsplit('.', 1)[0] + ".3"
         ))
 
         with open('./tls/openssl.cnf', 'w') as openssl:
