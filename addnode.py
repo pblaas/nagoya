@@ -89,7 +89,7 @@ try:
         subprocess.call(["openssl", "req", "-new", "-key", nodeip + "-etcd-node-key.pem", "-out", nodeip + "-etcd-node.csr", "-subj", "/CN=" + nodeip + "-etcd-node", "-config", "openssl.cnf"], cwd='./tls')
         subprocess.call(["openssl", "x509", "-req", "-in", nodeip + "-etcd-node.csr", "-CA", "etcd-ca.pem", "-CAkey", "etcd-ca-key.pem", "-CAcreateserial", "-out", nodeip + "-etcd-node.pem", "-days", "730", "-extensions", "v3_req", "-extfile", "openssl.cnf"], cwd='./tls')
 
-    def initCertsOnEtcd(nodeip, clusterID, clustername, remoteetcd, action):
+    def initCertsOnEtcd(nodeip, clusterid, clustername, remoteetcd, action):
         """Publish certificates on remote etcd"""
 
         pkilist = [nodeip + "-etcd-node-key.pem",
