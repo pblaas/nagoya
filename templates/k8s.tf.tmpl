@@ -274,9 +274,9 @@ resource "openstack_lb_monitor_v2" "{{ clustername }}_monitor_1" {
   name        = "{{ clustername }}_monitor_1"
   pool_id     = "${openstack_lb_pool_v2.{{ clustername }}_pool_1.id}"
   type        = "PING"
-  delay       = 20
+  delay       = 30
   timeout     = 10
-  max_retries = 50
+  max_retries = 10
 }
 
 resource "openstack_lb_loadbalancer_v2" "{{ clustername }}_lb_1" {
@@ -320,9 +320,9 @@ resource "openstack_lb_monitor_v2" "{{ clustername }}_monitor_2" {
   name        = "{{ clustername }}_monitor_2"
   pool_id     = "${openstack_lb_pool_v2.{{ clustername }}_pool_2.id}"
   type        = "PING"
-  delay       = 20
+  delay       = 30
   timeout     = 10
-  max_retries = 50
+  max_retries = 10
 }
 
 resource "openstack_lb_loadbalancer_v2" "{{ clustername }}_lb_2" {
