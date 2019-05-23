@@ -17,7 +17,7 @@ role=$6
 
 declare -a pkilist
 
-if [ "${role}" == "master"]; then
+if [ "${role}" == "master" ]; then
   pkilist=($nodeip"-etcd-node-key.pem"
            $nodeip"-etcd-node.pem"
            $nodeip"-k8s-kube-cm.pem"
