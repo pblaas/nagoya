@@ -477,7 +477,7 @@ storage:
               - /hyperkube
               - apiserver
               - --bind-address=0.0.0.0
-              - --etcd-servers={{ etcd_endpoints }}
+              - --etcd-servers={{ etcdendpointsurls }}
               - --etcd-cafile=/etc/kubernetes/ssl/etcd-ca.pem
               - --etcd-certfile=/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node.pem
               - --etcd-keyfile=/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node-key.pem
