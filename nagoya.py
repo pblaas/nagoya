@@ -176,7 +176,7 @@ try:
 
             openssltemplate = (etcd_openssl_template.render(
                 ipaddress=nodeip,
-                loadbalancer=(args.subnetcidr).rsplit('.', 1)[0] + ".3"
+                loadbalancer=(args.subnetcidr).rsplit('.', 1)[0] + ".3",
                 firstmaster=(args.subnetcidr).rsplit('.', 1)[0] + ".10"
             ))
 
