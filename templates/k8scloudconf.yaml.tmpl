@@ -486,7 +486,6 @@ storage:
               - --storage-backend=etcd3
               - --service-cluster-ip-range=10.3.0.0/24
               - --secure-port=443
-              - --insecure-port=0
               - --advertise-address={{ ipaddress }}
 {% if alphafeatures == "true" %}
               - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,Priority,ResourceQuota,NodeRestriction
