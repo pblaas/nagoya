@@ -14,7 +14,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.32"
+__version__ = "0.3.33"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -80,7 +80,7 @@ parser.add_argument("--k8sver", help="Hyperkube version - (v1.14.2)", default="v
 parser.add_argument("--etcdver", help="ETCD version - (3.3.13)", default="3.3.13")
 parser.add_argument("--flannelver", help="Flannel image version - (0.11.0)", default="0.11.0")
 parser.add_argument("--netoverlay", help="Network overlay - (flannel)", choices=['flannel', 'calico'], default="flannel")
-parser.add_argument("--rbac", help="RBAC mode - (false)", choices=['true', 'false'], default="false")
+parser.add_argument("--rbac", help="RBAC mode - (true)", choices=['true', 'false'], default="true")
 parser.add_argument("--apidebuglevel", help="Api DebugLevel - (1)", type=int, choices=range(1, 11), default=1)
 parser.add_argument("--proxymode", help="Proxymode - (iptables)", choices=['ipvs', 'iptables'], default="iptables")
 parser.add_argument("--alphafeatures", help="enable alpha feature - (false)", choices=['true', 'false'], default="false")
