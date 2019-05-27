@@ -283,6 +283,7 @@ resource "openstack_lb_loadbalancer_v2" "{{ clustername }}_lb_1" {
   name          = "{{ clustername }}_lb_1"
   security_group_ids = ["${openstack_networking_secgroup_v2.secgroup_{{ clustername }}-1.id}"]
   vip_subnet_id = "${openstack_networking_subnet_v2.subnet_{{ clustername }}.id}"
+  vip_address   = {{ lb1ip }}
 }
 
 resource "openstack_lb_listener_v2" "{{ clustername }}_listener_1" {
@@ -328,6 +329,7 @@ resource "openstack_lb_monitor_v2" "{{ clustername }}_monitor_2" {
 resource "openstack_lb_loadbalancer_v2" "{{ clustername }}_lb_2" {
   name          = "{{ clustername }}_lb_2"
   vip_subnet_id = "${openstack_networking_subnet_v2.subnet_{{ clustername }}.id}"
+  vip_address   = {{ lb2ip }}
   security_group_ids = ["${openstack_networking_secgroup_v2.secgroup_{{ clustername }}-1.id}"]
   depends_on = [
        "openstack_lb_loadbalancer_v2.{{ clustername }}_lb_1"

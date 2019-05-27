@@ -565,6 +565,8 @@ try:
             podcidr=args.podcidr,
             ipaddress=lanip,
             ipaddressgw=(args.subnetcidr).rsplit('.', 1)[0] + ".1",
+            lb1ip=(args.subnetcidr).rsplit('.', 1)[0] + ".3",
+            lb2ip=(args.subnetcidr).rsplit('.', 1)[0] + ".4",
             alphafeatures=args.alphafeatures,
             proxymode=args.proxymode,
             clusterid=clusterID,
