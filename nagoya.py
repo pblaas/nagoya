@@ -14,7 +14,7 @@ from jinja2 import Environment, FileSystemLoader
 
 __author__ = "Patrick Blaas <patrick@kite4fun.nl>"
 __license__ = "GPL v3"
-__version__ = "0.3.33"
+__version__ = "0.3.34"
 __status__ = "Active"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -523,6 +523,8 @@ try:
         managers=args.managers,
         workers=args.workers,
         subnetcidr=args.subnetcidr,
+        lb1ip=(args.subnetcidr).rsplit('.', 1)[0] + ".3",
+        lb2ip=(args.subnetcidr).rsplit('.', 1)[0] + ".4",
         podcidr=args.podcidr,
         keypair=args.keypair,
         workerimageflavor=args.workerimageflavor,
