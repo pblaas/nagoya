@@ -78,7 +78,7 @@ try:
 
         openssltemplate = (etcd_openssl_template.render(
             ipaddress=nodeip,
-            loadbalancer=(subnetcidr).rsplit('.', 1)[0] + ".3"
+            loadbalancer=(subnetcidr).rsplit('.', 1)[0] + ".3",
             firstmaster=(subnetcidr).rsplit('.', 1)[0] + ".10"
         ))
 
