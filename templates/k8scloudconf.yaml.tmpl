@@ -489,6 +489,7 @@ storage:
               - --etcd-keyfile=/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node-key.pem
               - --apiserver-count={{ managers }}
               - --storage-backend=etcd3
+              - --allow-privileged=true
               - --service-cluster-ip-range=10.3.0.0/24
               - --secure-port=443
               - --advertise-address={{ ipaddress }}
