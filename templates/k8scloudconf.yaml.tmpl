@@ -570,6 +570,8 @@ storage:
               - /hyperkube
               - kube-proxy
               - --config=/etc/kubernetes/kubeproxy.config
+              securityContext:
+                privileged: true
               volumeMounts:
               - mountPath: /etc/ssl/certs
                 name: ssl-certs-host
