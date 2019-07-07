@@ -415,7 +415,7 @@ storage:
           clusters:
           - name: local
             cluster:
-              server: https://{{ lb1ip }}
+              server: https://{{ ipaddress }}
               certificate-authority: /etc/kubernetes/ssl/ca.pem
           users:
           - name: kube-controller-manager
@@ -438,7 +438,7 @@ storage:
           clusters:
           - name: local
             cluster:
-              server: https://{{ lb1ip }}
+              server: https://{{ ipaddress }}
               certificate-authority: /etc/kubernetes/ssl/ca.pem
           users:
           - name: kube-scheduler
