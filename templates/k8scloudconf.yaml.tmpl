@@ -18,8 +18,8 @@ etcd:
   peer_trusted_ca_file:        "/etc/ssl/certs/etcd-ca.pem"
   peer_client_cert_auth:       true
   metrics:                     "extensive"
-  heartbeat_interval:          500
-  election_timeout:            5000
+  heartbeat_interval:          100
+  election_timeout:            500
 {% endif %}
 
 networkd:
