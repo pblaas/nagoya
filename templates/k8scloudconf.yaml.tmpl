@@ -248,7 +248,6 @@ systemd:
 {% endif %}
         --network-plugin=cni \
         --container-runtime=docker \
-        --allow-privileged=true \
         --config=/etc/kubernetes/kubelet.config \
         --tls-cert-file=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node.pem \
         --tls-private-key-file=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node-key.pem \
@@ -489,7 +488,6 @@ storage:
               - --etcd-certfile=/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node.pem
               - --etcd-keyfile=/etc/kubernetes/ssl/{{ ipaddress }}-etcd-node-key.pem
               - --apiserver-count={{ managers }}
-              - --allow-privileged=true
               - --storage-backend=etcd3
               - --service-cluster-ip-range=10.3.0.0/24
               - --secure-port=443
