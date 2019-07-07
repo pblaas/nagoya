@@ -481,7 +481,7 @@ storage:
               image: gcr.io/google-containers/hyperkube-amd64:{{ k8sver }}
               command:
               - /hyperkube
-              - apiserver
+              - kube-apiserver
               - --bind-address=0.0.0.0
               - --etcd-servers={{ etcdendpointsurls }}
               - --etcd-cafile=/etc/kubernetes/ssl/etcd-ca.pem
@@ -567,7 +567,7 @@ storage:
               image: gcr.io/google-containers/hyperkube-amd64:{{ k8sver }}
               command:
               - /hyperkube
-              - proxy
+              - kube-proxy
               - --config=/etc/kubernetes/kubeproxy.config
               securityContext:
                 privileged: true
@@ -615,7 +615,7 @@ storage:
               image: gcr.io/google-containers/hyperkube-amd64:{{ k8sver }}
               command:
               - /hyperkube
-              - controller-manager
+              - kube-controller-manager
               - --leader-elect=true
               - --service-account-private-key-file=/etc/kubernetes/ssl/sa-{{ clustername }}-k8s-key.pem
               - --root-ca-file=/etc/kubernetes/ssl/ca.pem
@@ -677,7 +677,7 @@ storage:
               image: gcr.io/google-containers/hyperkube-amd64:{{ k8sver }}
               command:
               - /hyperkube
-              - scheduler
+              - kube-scheduler
               - --leader-elect=true
               - --kubeconfig=/etc/kubernetes/scheduler.yaml
               - --tls-cert-file=/etc/kubernetes/ssl/{{ ipaddress }}-k8s-node.pem
