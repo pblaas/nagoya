@@ -126,7 +126,7 @@ try:
 
         print("Service account K8s")
         subprocess.call(["openssl", "genrsa", "-out", "sa-" + (args.clustername) + "-k8s-key.pem", "2048"], cwd='./tls')
-        subprocess.call(["openssl", "rsa", "-in", "sa-" + (args.clustername) + "-k8s-key.pem", "-pubout", ">", "sa-" + (args.clustername) + "-k8s.pem"], cwd='./tls')
+        subprocess.call(["openssl", "rsa", "-in", "sa-" + (args.clustername) + "-k8s-key.pem", "-pubout", "-out", "sa-" + (args.clustername) + "-k8s.pem"], cwd='./tls')
 
     # Create node certificates
     def createNodeCert(nodeip, k8srole):
