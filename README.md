@@ -1,4 +1,7 @@
-# nagoya
+# nagoya - STALE development
+Unfortunately I am unable to keep up with development of this project. As other tools like terraform mature this project will need some rework to be able to operate as advertised.
+The project will remain online as some parts may be of use as an example in other projects.
+
 Next development iteration of my terraformed kubernetes deploy scripts to produce Container Linux config files and Terraform files for bootstrapping Kubernetes on OpenStack.
 
 This project has a lot of similarities to project kioto but differs on the following:
